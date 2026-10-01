@@ -1,4 +1,4 @@
-import { ArrowUpRight, Github, Linkedin, Mail, FileText, Send } from 'lucide-react';
+import { ArrowUpRight, Github, Linkedin, Mail, Send } from 'lucide-react';
 import { SplitText } from './SplitText';
 import { allTech, profile } from '@/data';
 

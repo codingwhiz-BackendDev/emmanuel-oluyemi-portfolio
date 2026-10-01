@@ -115,7 +115,7 @@
   transition: opacity 0.35s var(--ease-out);
 }
 .btn-primary:hover::before { opacity: 1; }
-.btn-primary > * { position: relative; z-index: 1; }
+.btn-primary > * { position: relative; z-index: 3; }
 .btn-primary::after {
   content: '';
   position: absolute;

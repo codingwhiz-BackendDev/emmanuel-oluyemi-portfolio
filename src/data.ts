@@ -95,10 +95,11 @@ export const experiences = [
     role: "Founder & Backend Engineer",
     company: "Orion Labs",
     period: "2024 — Present",
-    products: ["DjangoPilot", "Sellaris AI"],
+    products: ["ClassMillia", "DjangoPilot", "Sellaris AI"],
     tech: ["Django", "Python", "PostgreSQL", "React", "Docker"],
     bullets: [
       "Founder of Orion Labs, a forward-thinking tech company focused on building impactful, future-driven SaaS solutions. We create intelligent and scalable platforms that empower developers and businesses.",
+      "Building ClassMillia — an AI-powered academic management platform designed for higher education. It features smart geofencing & facial-embedding attendance, an AI Study Hub for querying course materials, an anti-cheat assessment engine, and a full integrated LMS with deep analytics.",
       "Leading the development of DjangoPilot — an advanced AI-powered Django tool that transforms prompts into fully functional web applications, handling backend logic, API development, and deployment.",
       "Also building Sellaris AI, a smart platform that helps businesses scale, automate customer interactions, and streamline product sales.",
     ],
@@ -148,6 +149,13 @@ export const experiences = [
 ];
 
 export const projects = [
+  {
+    title: "ClassMillia",
+    description: "AI-powered academic management platform — the OS for the modern university classroom. Built by Orion Labs. Features smart geofencing & facial-embedding attendance, an AI Study Hub that lets students query uploaded course materials and generate flashcards and mock quizzes, a multi-layered anti-cheat assessment engine, and a full integrated LMS with deep analytics.",
+    tag: "SaaS",
+    image: "/images/portfolio/classmillia.jpg",
+    link: "#",
+  },
   {
     title: "CampyAlly",
     description: "Won 3rd Place in the RCCG Kingdom Hackathon (800+ applicants). Your city, one message away. Report emergencies, find the lost, and park smarter with real-time guidance — all from a single WhatsApp chat powered by AI.",
