@@ -77,7 +77,7 @@ export function Contact() {
                   href={profile.socials.x}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <XIcon className="size-4" />
                   <span>X</span>
@@ -86,7 +86,7 @@ export function Contact() {
                   href={profile.socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <Github className="size-4" />
                   <span>GitHub</span>
@@ -95,14 +95,14 @@ export function Contact() {
                   href={profile.socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <Linkedin className="size-4" />
                   <span>LinkedIn</span>
                 </a>
                 <a
                   href={profile.socials.email}
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <Mail className="size-4" />
                   <span>Email</span>
@@ -135,7 +135,7 @@ export function Contact() {
               />
               <button
                 type="submit"
-                className="w-full bg-white text-ink rounded-lg py-3 text-sm font-medium hover:bg-white/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full bg-white text-ink rounded-lg py-3 text-sm font-medium hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <FileText className="size-4" />
                 Send message

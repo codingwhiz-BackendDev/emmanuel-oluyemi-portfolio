@@ -44,7 +44,7 @@ export function Navbar() {
         {/* Logo */}
         <a
           href="#hero"
-          className="size-8 md:size-9 rounded-full flex items-center justify-center font-display font-extrabold text-foreground hover:bg-muted transition-colors"
+          className="size-8 md:size-9 rounded-full flex items-center justify-center font-display font-extrabold text-foreground hover:bg-muted hover:scale-110 transition-all duration-200"
           style={{ letterSpacing: '-0.09em' }}
           aria-label="Home"
         >

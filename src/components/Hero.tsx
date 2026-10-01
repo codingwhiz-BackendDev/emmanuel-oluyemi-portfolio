@@ -38,7 +38,7 @@ export function Hero() {
           animation: 'fadeIn 0.6s var(--ease-out) 0.1s forwards',
         }}
       >
-        <div className="size-32 md:size-40 rounded-full border-2 border-border overflow-hidden transition-all duration-300 group-hover:rotate-3 group-hover:scale-105 group-hover:border-foreground/30 shadow-lg">
+        <div className="size-32 md:size-40 rounded-full border-2 border-border overflow-hidden transition-all duration-300 group-hover:rotate-3 group-hover:scale-105 group-hover:border-foreground/30 shadow-lg shadow-foreground/10 group-hover:shadow-xl group-hover:shadow-foreground/20">
           <img
             src="/images/hero.jpg"
             alt="Emmanuel Oluyemi"
@@ -53,7 +53,7 @@ export function Hero() {
       </h1>
 
       {/* H2 - role */}
-      <h2 className="text-center text-xl md:text-2xl font-medium text-foreground leading-[1.05] tracking-tight mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+      <h2 className="text-center text-xl md:text-2xl font-medium text-foreground leading-[1.05] tracking-tight mb-6 bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text text-transparent">
         <SplitText text={profile.role} delay={400} charDelay={30} />
       </h2>
 
@@ -131,7 +131,7 @@ export function Hero() {
         </a>
         <a
           href="#contact"
-          className="border border-input bg-background rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-accent hover:border-foreground/30 hover:shadow-md active:scale-[0.97] transition-all duration-200"
+          className="border border-input bg-background text-foreground rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-accent hover:border-foreground/30 hover:shadow-md active:scale-[0.97] transition-all duration-200"
           style={{ transitionTimingFunction: 'var(--ease-out)' }}
         >
           Get in touch
@@ -141,7 +141,7 @@ export function Hero() {
       {/* Scroll down */}
       <a
         href="#about"
-        className="absolute md:bottom-8 bottom-4 size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute md:bottom-8 bottom-4 size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 hover:bg-accent hover:shadow-md transition-all duration-200"
         aria-label="Scroll down"
       >
         <ArrowDown

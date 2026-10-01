@@ -80,7 +80,7 @@ function ProjectRow({
 }) {
   return (
     <div
-      className="xp-row proj-row group border-b border-border py-5 transition-opacity duration-200"
+      className="xp-row proj-row group border-b border-border py-5 transition-all duration-200 hover:bg-muted/30"
       style={{
         opacity: 0,
         animation: `fadeIn 0.4s var(--ease-out) ${index * 50}ms forwards`,
@@ -92,7 +92,7 @@ function ProjectRow({
             <h3 className="text-base md:text-lg font-semibold truncate group-hover:text-foreground transition-colors">
               {project.title}
             </h3>
-            <span className="shrink-0 rounded-full bg-accent text-accent-foreground px-2.5 py-0.5 text-xs font-medium">
+            <span className="shrink-0 rounded-full bg-accent text-accent-foreground px-2.5 py-0.5 text-xs font-medium border border-border">
               {project.tag}
             </span>
           </div>
@@ -104,14 +104,14 @@ function ProjectRow({
           <span className="text-sm text-muted-foreground hidden md:block">
             #{String(index + 1).padStart(2, '0')}
           </span>
-          <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground group-hover:scale-110 transition-all duration-200" />
         </div>
       </div>
 
       {/* Desktop hover image */}
       <div className="proj-image-wrap mt-0">
         <div>
-          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1">
+          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1 group-hover:border-foreground/30 transition-colors">
             <img
               src={project.image}
               alt={project.title}

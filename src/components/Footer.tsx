@@ -46,7 +46,7 @@ export function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={link.label}
-                  className="hover-fine size-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                  className="hover-fine size-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-110 hover:shadow-md transition-all duration-200"
                 >
                   <Icon className="size-4" />
                 </a>

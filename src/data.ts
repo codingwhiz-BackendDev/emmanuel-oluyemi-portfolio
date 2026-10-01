@@ -22,10 +22,10 @@ export const profile = {
     Tools: ["Git", "Docker", "Celery", "REST APIs", "WebSockets", "TailwindCSS"],
   },
   socials: {
-    x: "https://x.com/",
-    github: "https://github.com/",
-    linkedin: "https://www.linkedin.com/",
-    email: "mailto:emmanuel@example.com",
+    x: "https://x.com/IAmCodingWhiz",
+    github: "https://github.com/codingwhiz-BackendDev",
+    linkedin: "https://www.linkedin.com/in/emmanuel-oluyemi-9116a4300/",
+    email: "mailto:oluyemiemma2409@gmail.com",
   },
 };
 

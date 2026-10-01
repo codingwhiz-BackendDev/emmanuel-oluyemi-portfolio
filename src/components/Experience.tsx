@@ -44,13 +44,13 @@ function ExperienceRow({
   const Icon = getIcon();
 
   return (
-    <div className="xp-row border-b border-border">
+    <div className="xp-row border-b border-border hover:bg-muted/30 transition-colors duration-200">
       <button
         onClick={() => setOpen(!open)}
         className="w-full py-5 flex items-center gap-4 text-left group"
       >
         {/* Icon */}
-        <div className="size-10 rounded-xl bg-accent/50 border border-border flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors">
+        <div className="size-10 rounded-xl bg-accent/50 border border-border flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
           <Icon className="size-5 text-foreground" />
         </div>
 
@@ -62,9 +62,9 @@ function ExperienceRow({
         {/* Title */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="text-base md:text-lg font-semibold">{exp.role}</span>
+            <span className="text-base md:text-lg font-semibold group-hover:text-foreground transition-colors">{exp.role}</span>
             <span className="text-muted-foreground text-sm">at</span>
-            <span className="bg-accent text-accent-foreground rounded-full px-3 py-0.5 text-sm font-medium hover:opacity-80 transition-opacity">
+            <span className="bg-accent text-accent-foreground rounded-full px-3 py-0.5 text-sm font-medium border border-border hover:opacity-80 transition-opacity">
               {exp.company}
             </span>
           </div>
@@ -75,10 +75,10 @@ function ExperienceRow({
         </div>
 
         {/* Chevron */}
-        <span className="size-8 rounded-full border border-border flex items-center justify-center shrink-0 transition-transform duration-200"
+        <span className="size-8 rounded-full border border-border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:border-foreground/30 group-hover:bg-accent"
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transitionTimingFunction: 'var(--ease-out)' }}
         >
-          <ChevronDown className="size-4 text-muted-foreground" />
+          <ChevronDown className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
         </span>
       </button>
 
