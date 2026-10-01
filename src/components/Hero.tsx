@@ -6,18 +6,27 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-24 pb-10 relative"
-      style={{
-        backgroundImage: 'url(/images/hero.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-      }}
+      className="min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-24 pb-10 relative bg-gradient-to-br from-background via-background to-muted/20 overflow-hidden"
     >
-      {/* Dark overlay for text readability */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+      {/* Animated gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse"
+          style={{
+            animation: 'float 8s ease-in-out infinite',
+            animationDelay: '0s',
+          }}
+        />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-foreground/10 rounded-full blur-3xl animate-pulse"
+          style={{
+            animation: 'float 10s ease-in-out infinite',
+            animationDelay: '2s',
+          }}
+        />
+      </div>
 
-      {/* Content wrapper with z-index */}
+      {/* Content wrapper */}
       <div className="relative z-10 flex flex-col items-center justify-center w-full">
       {/* Profile photo */}
       <a
@@ -29,7 +38,7 @@ export function Hero() {
           animation: 'fadeIn 0.6s var(--ease-out) 0.1s forwards',
         }}
       >
-        <div className="size-24 md:size-28 rounded-full border border-border overflow-hidden transition-transform duration-200 group-hover:rotate-3 group-hover:scale-105">
+        <div className="size-32 md:size-40 rounded-full border-2 border-border overflow-hidden transition-all duration-300 group-hover:rotate-3 group-hover:scale-105 group-hover:border-foreground/30 shadow-lg">
           <img
             src="/images/hero.jpg"
             alt="Emmanuel Oluyemi"
@@ -44,21 +53,21 @@ export function Hero() {
       </h1>
 
       {/* H2 - role */}
-      <h2 className="text-center text-xl md:text-2xl font-medium text-muted-foreground leading-[1.05] tracking-tight mb-6">
+      <h2 className="text-center text-xl md:text-2xl font-medium text-foreground leading-[1.05] tracking-tight mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
         <SplitText text={profile.role} delay={400} charDelay={30} />
       </h2>
 
       {/* Subtitle */}
       <p
-        className="text-lg text-muted-foreground max-w-xl text-center leading-relaxed mb-6"
+        className="text-lg text-muted-foreground max-w-2xl text-center leading-relaxed mb-6"
         style={{
           opacity: 0,
           animation: 'fadeIn 0.6s var(--ease-out) 0.8s forwards',
         }}
       >
-        A 20-year-old Backend Developer from Nigeria building scalable, secure web
-        applications with Django &amp; Python — turning ideas into real{' '}
-        <span className="font-accent text-[1.3em] text-foreground">products</span>.
+        Building scalable, secure web applications and mobile experiences that turn
+        innovative ideas into{' '}
+        <span className="font-accent text-[1.3em] text-foreground">production-ready products</span>.
       </p>
 
       {/* Social icons */}
@@ -73,7 +82,7 @@ export function Hero() {
           href={profile.socials.x}
           target="_blank"
           rel="noopener noreferrer"
-          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent hover:border-foreground/30 hover:scale-110 hover:shadow-md transition-all duration-200"
           aria-label="X (Twitter)"
         >
           <Twitter className="size-5" />
@@ -82,7 +91,7 @@ export function Hero() {
           href={profile.socials.github}
           target="_blank"
           rel="noopener noreferrer"
-          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent hover:border-foreground/30 hover:scale-110 hover:shadow-md transition-all duration-200"
           aria-label="GitHub"
         >
           <Github className="size-5" />
@@ -91,14 +100,14 @@ export function Hero() {
           href={profile.socials.linkedin}
           target="_blank"
           rel="noopener noreferrer"
-          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent hover:border-foreground/30 hover:scale-110 hover:shadow-md transition-all duration-200"
           aria-label="LinkedIn"
         >
           <Linkedin className="size-5" />
         </a>
         <a
           href={profile.socials.email}
-          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent hover:border-foreground/30 hover:scale-110 hover:shadow-md transition-all duration-200"
           aria-label="Email"
         >
           <Mail className="size-5" />
@@ -115,14 +124,14 @@ export function Hero() {
       >
         <a
           href="#projects"
-          className="bg-foreground text-background rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-foreground/90 active:scale-[0.97] transition-all duration-150"
+          className="bg-foreground text-background rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-foreground/90 hover:shadow-lg hover:shadow-foreground/20 active:scale-[0.97] transition-all duration-200"
           style={{ transitionTimingFunction: 'var(--ease-out)' }}
         >
           View my work
         </a>
         <a
           href="#contact"
-          className="border border-input bg-background rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-accent active:scale-[0.97] transition-all duration-150"
+          className="border border-input bg-background rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-accent hover:border-foreground/30 hover:shadow-md active:scale-[0.97] transition-all duration-200"
           style={{ transitionTimingFunction: 'var(--ease-out)' }}
         >
           Get in touch

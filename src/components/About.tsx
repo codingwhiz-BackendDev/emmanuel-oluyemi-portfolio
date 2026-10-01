@@ -1,7 +1,7 @@
 import { SplitText } from './SplitText';
 import { FadeUp } from './FadeUp';
 import { profile } from '@/data';
-import { Terminal, Code, Database, Cpu, Wrench } from 'lucide-react';
+import { Code, Database, Cpu, Wrench } from 'lucide-react';
 
 const asciiChars = '▓*,#=▚&·░@;▒+.%-▞$:';
 
@@ -23,7 +23,7 @@ export function About() {
         <div className="space-y-6">
           <FadeUp>
             <p className="text-lg text-foreground font-semibold">
-              I'm Emmanuel Oluyemi, a Backend Developer
+              {profile.intro.title}
             </p>
           </FadeUp>
           {profile.intro.paragraphs.map((p, i) => (
@@ -34,24 +34,6 @@ export function About() {
             </FadeUp>
           ))}
         </div>
-
-        {/* Code snippet card */}
-        <FadeUp delay={300}>
-          <div className="mt-8 rounded-2xl border border-border bg-muted/40 overflow-hidden">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/60">
-              <div className="flex gap-1.5">
-                <span className="size-2.5 rounded-full bg-red-400/70" />
-                <span className="size-2.5 rounded-full bg-yellow-400/70" />
-                <span className="size-2.5 rounded-full bg-green-400/70" />
-              </div>
-              <Terminal className="size-3.5 text-muted-foreground ml-1" />
-              <span className="text-xs text-muted-foreground font-mono">developer.js</span>
-            </div>
-            <pre className="p-4 text-sm font-mono text-foreground overflow-x-auto leading-relaxed">
-              <code>{profile.codeSnippet}</code>
-            </pre>
-          </div>
-        </FadeUp>
 
         {/* Skills */}
         <FadeUp delay={400}>

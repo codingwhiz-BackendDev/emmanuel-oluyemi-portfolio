@@ -2,25 +2,19 @@ export const profile = {
   name: "Emmanuel Oluyemi",
   firstName: "Emmanuel",
   lastName: "Oluyemi",
-  role: "Backend Developer",
-  tagline: "A 20-year-old Backend Developer from Nigeria building scalable, secure web applications with Django & Python — turning ideas into real products.",
+  role: "Software & Mobile Developer",
+  tagline: "Building scalable, secure web applications and mobile experiences that turn innovative ideas into production-ready products.",
   intro: {
-    title: "I'm Emmanuel Oluyemi, a Backend Developer",
+    title: "Software & Mobile Developer",
     paragraphs: [
-      "As a passionate web developer with a strong focus on backend development, I specialize in crafting scalable, efficient and reliable web applications using Django, React and JavaScript. With a solid foundation in computer science and a keen eye for detail, I excel at building robust backend systems that power fast, secure and engaging web experiences.",
-      "I recently started my journey in Mobile development, learning Dart & Flutter. I'm currently studying Computer Science at Redeemer's University Ede (2023–2027).",
+      "A passionate full-stack developer specializing in backend engineering and mobile development. I craft scalable, efficient, and reliable web applications using Django, React, and JavaScript, while building cross-platform mobile experiences with Dart & Flutter.",
+      "With a solid foundation in computer science and a keen eye for detail, I excel at building robust backend systems that power fast, secure, and engaging web and mobile experiences. Currently studying Computer Science at Redeemer's University Ede (2023–2027).",
     ],
     skillsNote: [
       { label: "Currently in 4th year.", value: "Started October 26, 2023." },
       { label: "Started programming in 2021.", value: "5+ years of personal and freelance project experience." },
     ],
   },
-  codeSnippet: `const developer = {
-  name: "Emmanuel Oluyemi",
-  stack: "Django + Python",
-  age: 20,
-  location: "Nigeria 🇳🇬"
-};`,
   skills: {
     Languages: ["Python", "JavaScript", "Dart", "TypeScript"],
     Frameworks: ["Django", "React.js", "Flask", "Flutter", "FastAPI"],
