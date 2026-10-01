@@ -1,8 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const desktopNavRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState<{ left: number; width: number; show: boolean }>({
+    left: 0,
+    width: 0,
+    show: false,
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -29,17 +36,39 @@ export function Navbar() {
     return () => observer.disconnect();
   }, []);
 
+  // Animate the active indicator pill behind desktop nav links
+  useLayoutEffect(() => {
+    const activeId = activeSection;
+    const link = linkRefs.current[activeId];
+    const nav = desktopNavRef.current;
+    if (link && nav) {
+      const navRect = nav.getBoundingClientRect();
+      const linkRect = link.getBoundingClientRect();
+      setIndicator({
+        left: linkRect.left - navRect.left,
+        width: linkRect.width,
+        show: true,
+      });
+    } else {
+      setIndicator((prev) => ({ ...prev, show: false }));
+    }
+  }, [activeSection]);
+
   const navItems = [
-    { label: 'About', href: '#about' },
-    { label: 'Work', href: '#projects' },
-    { label: 'Experience', href: '#experience' },
+    { label: 'About', href: '#about', id: 'about' },
+    { label: 'Work', href: '#projects', id: 'projects' },
+    { label: 'Experience', href: '#experience', id: 'experience' },
   ];
 
   return (
     <header className="fixed top-5 md:top-10 left-1/2 -translate-x-1/2 z-50">
       <nav
-        className="rounded-full border border-border bg-background/85 backdrop-blur-md px-1.5 md:px-2 py-1.5 md:py-2 flex items-center gap-0.5 md:gap-1 transition-all duration-200"
-        style={{ boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.06)' : '0 1px 3px rgba(0,0,0,0.03)' }}
+        className="rounded-full border border-border bg-background/80 backdrop-blur-xl px-1.5 md:px-2 py-1.5 md:py-2 flex items-center gap-0.5 md:gap-1 transition-all duration-300"
+        style={{
+          boxShadow: scrolled
+            ? '0 8px 32px -8px hsl(var(--brand) / 0.15), 0 2px 8px rgba(0,0,0,0.06)'
+            : '0 1px 3px rgba(0,0,0,0.03)',
+        }}
       >
         {/* Logo */}
         <a
@@ -54,14 +83,23 @@ export function Navbar() {
         <div className="h-5 w-px bg-border mx-0.5" />
 
         {/* Nav links - desktop */}
-        <div className="hidden md:flex items-center gap-0.5">
+        <div ref={desktopNavRef} className="hidden md:flex items-center gap-0.5 relative">
+          {indicator.show && (
+            <span
+              className="nav-indicator h-8 top-1/2 -translate-y-1/2"
+              style={{ left: indicator.left, width: indicator.width, opacity: 1 }}
+            />
+          )}
           {navItems.map((item) => {
-            const isActive = activeSection === item.href.slice(1);
+            const isActive = activeSection === item.id;
             return (
               <a
                 key={item.label}
+                ref={(el) => {
+                  linkRefs.current[item.id] = el;
+                }}
                 href={item.href}
-                className={`nav-nudge rounded-full px-3 h-8 flex items-center text-[13px] md:text-sm font-medium transition-colors ${
+                className={`nav-nudge relative z-10 rounded-full px-3 h-8 flex items-center text-sm font-medium transition-colors duration-200 ${
                   isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -75,26 +113,31 @@ export function Navbar() {
 
         {/* Nav links - mobile */}
         <div className="flex md:hidden items-center gap-0.5">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="nav-nudge rounded-full px-2 h-8 flex items-center text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const isActive = activeSection === item.id;
+            return (
+              <a
+                key={item.label}
+                href={item.href}
+                className={`nav-nudge rounded-full px-2 h-8 flex items-center text-xs font-medium transition-colors ${
+                  isActive ? 'text-foreground bg-muted' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </div>
 
         {/* Contact button */}
         <a
           href="#contact"
-          className={`bg-foreground text-background rounded-full px-3 md:px-4 h-8 md:h-9 flex items-center text-[13px] md:text-sm font-medium hover:bg-foreground/90 active:scale-[0.97] transition-all duration-150 ${
-            activeSection === 'contact' ? 'ring-2 ring-foreground/20' : ''
+          className={`btn-primary rounded-full px-3 md:px-4 h-8 md:h-9 flex items-center text-[13px] md:text-sm font-medium active:scale-[0.97] transition-all duration-200 ${
+            activeSection === 'contact' ? 'ring-2 ring-brand/30' : ''
           }`}
           style={{ transitionTimingFunction: 'var(--ease-out)' }}
         >
-          Contact
+          <span className="relative z-10">Contact</span>
         </a>
       </nav>
     </header>

@@ -51,8 +51,8 @@ export function Projects() {
                 {tag}
                 {filter === tag && (
                   <span
-                    className="absolute -bottom-px left-0 right-0 h-0.5 bg-foreground"
-                    style={{ transition: 'all 0.2s var(--ease-out)' }}
+                    className="absolute -bottom-px left-0 right-0 h-0.5 bg-brand-gradient rounded-full"
+                    style={{ transition: 'all 0.3s var(--ease-out)' }}
                   />
                 )}
               </button>
@@ -80,57 +80,59 @@ function ProjectRow({
 }) {
   return (
     <div
-      className="xp-row proj-row group border-b border-border py-5 transition-all duration-200 hover:bg-muted/30"
+      className="xp-row proj-row group border-b border-border py-5 transition-all duration-200"
       style={{
         opacity: 0,
         animation: `fadeIn 0.4s var(--ease-out) ${index * 50}ms forwards`,
       }}
     >
-      <div className="flex items-baseline justify-between gap-4">
-        <div className="min-w-0">
-          <div className="flex items-center gap-3">
-            <h3 className="text-base md:text-lg font-semibold truncate group-hover:text-foreground transition-colors">
-              {project.title}
-            </h3>
-            <span className="shrink-0 rounded-full bg-accent text-accent-foreground px-2.5 py-0.5 text-xs font-medium border border-border">
-              {project.tag}
-            </span>
+      <a href={project.link} target={project.link.startsWith('#') ? undefined : '_blank'} rel="noopener noreferrer" className="block">
+        <div className="flex items-baseline justify-between gap-4 px-1">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              <h3 className="text-base md:text-lg font-semibold truncate group-hover:text-brand transition-colors duration-200">
+                {project.title}
+              </h3>
+              <span className="shrink-0 rounded-full bg-brand/10 text-brand px-2.5 py-0.5 text-xs font-medium border border-brand/20">
+                {project.tag}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground line-clamp-2 max-w-xl md:max-w-2xl leading-relaxed">
+              {project.description}
+            </p>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2 max-w-xl md:max-w-2xl leading-relaxed">
-            {project.description}
-          </p>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-sm text-muted-foreground hidden md:block">
+              #{String(index + 1).padStart(2, '0')}
+            </span>
+            <ExternalLink className="size-4 text-muted-foreground group-hover:text-brand group-hover:scale-110 group-hover:-translate-y-0.5 transition-all duration-200" />
+          </div>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="text-sm text-muted-foreground hidden md:block">
-            #{String(index + 1).padStart(2, '0')}
-          </span>
-          <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground group-hover:scale-110 transition-all duration-200" />
-        </div>
-      </div>
 
-      {/* Desktop hover image */}
-      <div className="proj-image-wrap mt-0">
-        <div>
-          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1 group-hover:border-foreground/30 transition-colors">
+        {/* Desktop hover image */}
+        <div className="proj-image-wrap mt-0 px-1">
+          <div>
+            <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1 group-hover:border-brand/30 transition-colors">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile image (always visible) */}
+        <div className="md:hidden mt-3 px-1">
+          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted">
             <img
               src={project.image}
               alt={project.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
-      </div>
-
-      {/* Mobile image (always visible) */}
-      <div className="md:hidden mt-3">
-        <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted">
-          <img
-            src={project.image}
-            alt={project.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
+      </a>
     </div>
   );
 }

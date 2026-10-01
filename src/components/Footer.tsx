@@ -31,7 +31,7 @@ export function Footer() {
               EO
             </span>
             <span className="text-sm text-muted-foreground">
-              © 2025 {profile.name}. Built from Nigeria.
+              © {new Date().getFullYear()} {profile.name}. Built from Nigeria.
             </span>
           </div>
 
@@ -43,10 +43,10 @@ export function Footer() {
                 <a
                   key={link.label}
                   href={link.href}
-                  target="_blank"
+                  target={link.href.startsWith('mailto:') ? undefined : '_blank'}
                   rel="noopener noreferrer"
                   aria-label={link.label}
-                  className="hover-fine size-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted hover:scale-110 hover:shadow-md transition-all duration-200"
+                  className="hover-fine size-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-brand-foreground hover:bg-brand-gradient hover:scale-110 hover:shadow-lg hover:shadow-brand/30 transition-all duration-200"
                 >
                   <Icon className="size-4" />
                 </a>

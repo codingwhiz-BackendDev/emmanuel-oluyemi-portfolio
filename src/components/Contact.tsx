@@ -1,4 +1,4 @@
-import { ArrowUpRight, Github, Linkedin, Mail, FileText } from 'lucide-react';
+import { ArrowUpRight, Github, Linkedin, Mail, FileText, Send } from 'lucide-react';
 import { SplitText } from './SplitText';
 import { allTech, profile } from '@/data';
 
@@ -15,9 +15,18 @@ export function Contact() {
 
   return (
     <div className="relative overflow-hidden mt-24" style={{ borderRadius: '32px' }}>
+      {/* Brand glow accent */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[40rem] h-[40rem] rounded-full blur-3xl pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle, hsl(var(--brand) / 0.18), transparent 65%)',
+          transform: 'translate(-50%, -55%)',
+        }}
+      />
       <section
         id="contact"
-        className="bg-ink text-ink-foreground py-24 md:py-32 w-full"
+        className="relative bg-ink text-ink-foreground py-24 md:py-32 w-full"
         style={{ transform: 'scale(0.94)', transformOrigin: 'center' }}
       >
         <div className="container mx-auto max-w-4xl px-6">
@@ -27,7 +36,7 @@ export function Contact() {
           </h2>
           <p
             className="text-white/60 text-lg mb-12 max-w-xl"
-            style={{ opacity: 0, animation: 'fadeIn 0.6s var(--ease-out) 0.6s forwards' }}
+            style={{ opacity: 0, animation: 'fadeInUp 0.7s var(--ease-out) 0.6s forwards' }}
           >
             Open to freelance work, collaborations, and interesting problems. Reach out and let's talk.
           </p>
@@ -39,7 +48,7 @@ export function Contact() {
                 {marqueeItems.map((tech, i) => (
                   <span
                     key={`l-${i}`}
-                    className="rounded-full border border-white/15 text-white/80 px-4 py-1.5 text-sm font-medium whitespace-nowrap shrink-0"
+                    className="rounded-full border border-white/15 text-white/80 px-4 py-1.5 text-sm font-medium whitespace-nowrap shrink-0 hover:border-brand/50 hover:text-white transition-colors"
                   >
                     {tech}
                   </span>
@@ -51,7 +60,7 @@ export function Contact() {
                 {[...marqueeItems].reverse().map((tech, i) => (
                   <span
                     key={`r-${i}`}
-                    className="rounded-full border border-white/15 text-white/80 px-4 py-1.5 text-sm font-medium whitespace-nowrap shrink-0"
+                    className="rounded-full border border-white/15 text-white/80 px-4 py-1.5 text-sm font-medium whitespace-nowrap shrink-0 hover:border-brand/50 hover:text-white transition-colors"
                   >
                     {tech}
                   </span>
@@ -66,10 +75,10 @@ export function Contact() {
             <div>
               <a
                 href={profile.socials.email}
-                className="group inline-flex items-center gap-2 font-display text-lg sm:text-xl md:text-2xl lg:text-3xl underline decoration-white/20 hover:decoration-white/40 transition-all"
+                className="group inline-flex items-center gap-2 font-display text-lg sm:text-xl md:text-2xl lg:text-3xl underline decoration-white/20 hover:decoration-brand transition-all"
               >
                 <span>{profile.socials.email.replace('mailto:', '')}</span>
-                <ArrowUpRight className="size-5 md:size-6 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowUpRight className="size-5 md:size-6 text-brand transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
 
               <div className="flex flex-wrap gap-3 mt-8">
@@ -77,7 +86,7 @@ export function Contact() {
                   href={profile.socials.x}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-brand hover:text-white hover:bg-brand/20 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <XIcon className="size-4" />
                   <span>X</span>
@@ -86,7 +95,7 @@ export function Contact() {
                   href={profile.socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-brand hover:text-white hover:bg-brand/20 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <Github className="size-4" />
                   <span>GitHub</span>
@@ -95,14 +104,14 @@ export function Contact() {
                   href={profile.socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-brand hover:text-white hover:bg-brand/20 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <Linkedin className="size-4" />
                   <span>LinkedIn</span>
                 </a>
                 <a
                   href={profile.socials.email}
-                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-white/40 hover:text-white hover:bg-white/10 hover:scale-105 transition-all flex items-center gap-2"
+                  className="rounded-full border border-white/15 text-white/80 px-4 py-2 text-sm hover:border-brand hover:text-white hover:bg-brand/20 hover:scale-105 transition-all flex items-center gap-2"
                 >
                   <Mail className="size-4" />
                   <span>Email</span>
@@ -121,24 +130,24 @@ export function Contact() {
               <input
                 type="text"
                 placeholder="Your name"
-                className="w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-white/40 transition-colors"
+                className="w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-brand/60 focus:bg-white/10 transition-colors"
               />
               <input
                 type="email"
                 placeholder="Your email"
-                className="w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-white/40 transition-colors"
+                className="w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-brand/60 focus:bg-white/10 transition-colors"
               />
               <textarea
                 placeholder="Your message"
                 rows={4}
-                className="w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-white/40 transition-colors resize-none"
+                className="w-full bg-white/5 border border-white/15 text-white placeholder:text-white/40 rounded-lg px-4 py-3 text-sm outline-none focus:border-brand/60 focus:bg-white/10 transition-colors resize-none"
               />
               <button
                 type="submit"
-                className="w-full bg-white text-ink rounded-lg py-3 text-sm font-medium hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="btn-primary w-full rounded-lg py-3 text-sm font-medium active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
-                <FileText className="size-4" />
-                Send message
+                <Send className="size-4 relative z-10" />
+                <span className="relative z-10">Send message</span>
               </button>
             </form>
           </div>

@@ -33,7 +33,6 @@ function ExperienceRow({
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
-  // Get icon based on role/company
   const getIcon = () => {
     if (exp.company === 'Orion Labs' || exp.company === 'Self-employed') return Briefcase;
     if (exp.company === 'SkillBoost Africa' || exp.company === 'Internship') return GraduationCap;
@@ -50,8 +49,8 @@ function ExperienceRow({
         className="w-full py-5 flex items-center gap-4 text-left group"
       >
         {/* Icon */}
-        <div className="size-10 rounded-xl bg-accent/50 border border-border flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-          <Icon className="size-5 text-foreground" />
+        <div className="xp-row-icon icon-gradient size-10 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-brand-gradient">
+          <Icon className="size-5" />
         </div>
 
         {/* Date (desktop) */}
@@ -62,9 +61,11 @@ function ExperienceRow({
         {/* Title */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className="text-base md:text-lg font-semibold group-hover:text-foreground transition-colors">{exp.role}</span>
+            <span className="text-base md:text-lg font-semibold group-hover:text-foreground transition-colors">
+              {exp.role}
+            </span>
             <span className="text-muted-foreground text-sm">at</span>
-            <span className="bg-accent text-accent-foreground rounded-full px-3 py-0.5 text-sm font-medium border border-border hover:opacity-80 transition-opacity">
+            <span className="bg-brand/10 text-brand rounded-full px-3 py-0.5 text-sm font-medium border border-brand/20 hover:opacity-80 transition-opacity">
               {exp.company}
             </span>
           </div>
@@ -75,17 +76,16 @@ function ExperienceRow({
         </div>
 
         {/* Chevron */}
-        <span className="size-8 rounded-full border border-border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:border-foreground/30 group-hover:bg-accent"
+        <span
+          className="size-8 rounded-full border border-border flex items-center justify-center shrink-0 transition-all duration-300 group-hover:border-brand/40 group-hover:bg-brand/10"
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transitionTimingFunction: 'var(--ease-out)' }}
         >
-          <ChevronDown className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <ChevronDown className="size-4 text-muted-foreground group-hover:text-brand transition-colors" />
         </span>
       </button>
 
       {/* Expandable content */}
-      <div
-        className={`accordion-content ${open ? 'open' : ''}`}
-      >
+      <div className={`accordion-content ${open ? 'open' : ''}`}>
         <div className="accordion-inner">
           <div
             className="pb-5 md:pl-[240px] space-y-3"
@@ -97,7 +97,7 @@ function ExperienceRow({
             <ul className="space-y-2">
               {exp.bullets.map((bullet, i) => (
                 <li key={i} className="text-sm text-muted-foreground leading-relaxed flex gap-2">
-                  <span className="text-muted-foreground mt-1.5 shrink-0">·</span>
+                  <span className="text-brand mt-1.5 shrink-0">·</span>
                   <span>{bullet}</span>
                 </li>
               ))}
@@ -109,7 +109,7 @@ function ExperienceRow({
                 {exp.products.map((product) => (
                   <span
                     key={product}
-                    className="bg-accent text-accent-foreground rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    className="bg-brand-gradient text-brand-foreground rounded-full px-2.5 py-0.5 text-xs font-medium"
                   >
                     {product}
                   </span>
@@ -123,7 +123,7 @@ function ExperienceRow({
                 {exp.tech.map((tech) => (
                   <span
                     key={tech}
-                    className="bg-muted/50 border border-border text-muted-foreground rounded-full px-2.5 py-0.5 text-xs font-medium hover:bg-muted hover:border-foreground/20 transition-all"
+                    className="bg-muted/50 border border-border text-muted-foreground rounded-full px-2.5 py-0.5 text-xs font-medium hover:bg-muted hover:border-brand/20 transition-all"
                   >
                     {tech}
                   </span>
