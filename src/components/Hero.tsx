@@ -1,4 +1,4 @@
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Twitter, Github, Linkedin, Mail } from 'lucide-react';
 import { SplitText } from './SplitText';
 import { profile } from '@/data';
 
@@ -7,7 +7,18 @@ export function Hero() {
     <section
       id="hero"
       className="min-h-[100dvh] flex flex-col items-center justify-center px-4 pt-24 pb-10 relative"
+      style={{
+        backgroundImage: 'url(/images/hero.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
     >
+      {/* Dark overlay for text readability */}
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+
+      {/* Content wrapper with z-index */}
+      <div className="relative z-10 flex flex-col items-center justify-center w-full">
       {/* Profile photo */}
       <a
         href="#about"
@@ -19,9 +30,11 @@ export function Hero() {
         }}
       >
         <div className="size-24 md:size-28 rounded-full border border-border overflow-hidden transition-transform duration-200 group-hover:rotate-3 group-hover:scale-105">
-          <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
-            Photo
-          </div>
+          <img
+            src="/images/hero.jpg"
+            alt="Emmanuel Oluyemi"
+            className="w-full h-full object-cover"
+          />
         </div>
       </a>
 
@@ -48,43 +61,49 @@ export function Hero() {
         <span className="font-accent text-[1.3em] text-foreground">products</span>.
       </p>
 
-      {/* Social line */}
-      <p
-        className="text-sm text-muted-foreground mb-8"
+      {/* Social icons */}
+      <div
+        className="flex gap-4 mb-8"
         style={{
           opacity: 0,
           animation: 'fadeIn 0.6s var(--ease-out) 1s forwards',
         }}
       >
-        You can find me on{' '}
         <a
           href={profile.socials.x}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          aria-label="X (Twitter)"
         >
-          X
+          <Twitter className="size-5" />
         </a>
-        ,{' '}
         <a
           href={profile.socials.github}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          aria-label="GitHub"
         >
-          GitHub
+          <Github className="size-5" />
         </a>
-        , and{' '}
         <a
           href={profile.socials.linkedin}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-4 decoration-border hover:decoration-foreground transition-colors"
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          aria-label="LinkedIn"
         >
-          LinkedIn
+          <Linkedin className="size-5" />
         </a>
-        .
-      </p>
+        <a
+          href={profile.socials.email}
+          className="size-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-200"
+          aria-label="Email"
+        >
+          <Mail className="size-5" />
+        </a>
+      </div>
 
       {/* Buttons */}
       <div
@@ -121,6 +140,7 @@ export function Hero() {
           style={{ animation: 'gentle-bounce 2.4s ease-in-out infinite' }}
         />
       </a>
+      </div>
     </section>
   );
 }

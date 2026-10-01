@@ -1,7 +1,14 @@
 import { SplitText } from './SplitText';
 import { FadeUp } from './FadeUp';
 import { achievements } from '@/data';
-import { Trophy, Star } from 'lucide-react';
+import { Trophy, Star, Rocket, Award, Users, Package } from 'lucide-react';
+
+const achievementIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Completed 20+ Projects': Package,
+  'Python Developer Certification': Award,
+  'Growing Online Community': Users,
+  'Published PyPI Package': Rocket,
+};
 
 export function Achievements() {
   return (
@@ -20,16 +27,22 @@ export function Achievements() {
         </FadeUp>
 
         <div className="grid md:grid-cols-2 gap-4 mb-12">
-          {achievements.general.map((item, i) => (
-            <FadeUp key={item.title} delay={i * 80}>
-              <div className="border border-border rounded-2xl p-6 hover:bg-muted/50 transition-colors duration-200 h-full">
-                <h4 className="text-base font-semibold mb-2">{item.title}</h4>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
-            </FadeUp>
-          ))}
+          {achievements.general.map((item, i) => {
+            const Icon = achievementIcons[item.title] || Trophy;
+            return (
+              <FadeUp key={item.title} delay={i * 80}>
+                <div className="border border-border rounded-2xl p-6 hover:bg-muted/50 hover:border-foreground/20 transition-all duration-200 h-full">
+                  <div className="size-12 rounded-xl bg-gradient-to-br from-accent to-accent/50 border border-border flex items-center justify-center mb-4 text-foreground group-hover:scale-110 transition-transform duration-200 shadow-sm">
+                    <Icon className="size-6" />
+                  </div>
+                  <h4 className="text-base font-semibold mb-2">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {item.description}
+                  </p>
+                </div>
+              </FadeUp>
+            );
+          })}
         </div>
 
         {/* Hackathon Achievements */}
@@ -44,9 +57,13 @@ export function Achievements() {
           {achievements.hackathon.map((item, i) => (
             <FadeUp key={item.title} delay={i * 100}>
               <div className="border border-border rounded-2xl overflow-hidden hover:bg-muted/50 transition-colors duration-200">
-                {/* Image placeholder */}
-                <div className="aspect-[3/2] bg-muted flex items-center justify-center text-muted-foreground text-sm">
-                  {item.title} Certificate
+                {/* Image */}
+                <div className="aspect-[3/2] bg-muted overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div className="p-6">
                   <h4 className="text-base font-semibold mb-2">{item.title}</h4>

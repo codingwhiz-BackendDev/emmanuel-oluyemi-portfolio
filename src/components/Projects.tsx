@@ -2,11 +2,20 @@ import { useState } from 'react';
 import { SplitText } from './SplitText';
 import { FadeUp } from './FadeUp';
 import { projects } from '@/data';
+import { Globe, Bot, Trophy, Rocket, Wrench, ExternalLink } from 'lucide-react';
 
 export function Projects() {
   const [filter, setFilter] = useState('All');
 
   const tags = ['All', 'Web App', 'AI', 'Hackathon', 'SaaS', 'Tool'];
+  const tagIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+    'Web App': Globe,
+    'AI': Bot,
+    'Hackathon': Trophy,
+    'SaaS': Rocket,
+    'Tool': Wrench,
+  };
+
   const filtered = filter === 'All' ? projects : projects.filter((p) => p.tag === filter);
 
   return (
@@ -26,25 +35,29 @@ export function Projects() {
 
         {/* Filter tabs */}
         <div className="flex flex-wrap gap-1 mb-4 border-b border-border overflow-x-auto">
-          {tags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => setFilter(tag)}
-              className={`relative pb-3 pt-2 px-3 text-sm font-medium transition-colors whitespace-nowrap ${
-                filter === tag
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {tag}
-              {filter === tag && (
-                <span
-                  className="absolute -bottom-px left-0 right-0 h-0.5 bg-foreground"
-                  style={{ transition: 'all 0.2s var(--ease-out)' }}
-                />
-              )}
-            </button>
-          ))}
+          {tags.map((tag) => {
+            const Icon = tagIcons[tag];
+            return (
+              <button
+                key={tag}
+                onClick={() => setFilter(tag)}
+                className={`relative pb-3 pt-2 px-3 text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
+                  filter === tag
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {Icon && <Icon className="size-4" />}
+                {tag}
+                {filter === tag && (
+                  <span
+                    className="absolute -bottom-px left-0 right-0 h-0.5 bg-foreground"
+                    style={{ transition: 'all 0.2s var(--ease-out)' }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Project list */}
@@ -87,24 +100,35 @@ function ProjectRow({
             {project.description}
           </p>
         </div>
-        <span className="shrink-0 text-sm text-muted-foreground hidden md:block">
-          #{String(index + 1).padStart(2, '0')}
-        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-sm text-muted-foreground hidden md:block">
+            #{String(index + 1).padStart(2, '0')}
+          </span>
+          <ExternalLink className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </div>
       </div>
 
       {/* Desktop hover image */}
       <div className="proj-image-wrap mt-0">
         <div>
-          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1 flex items-center justify-center text-muted-foreground text-sm">
-            {project.title} preview
+          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1">
+            <img
+              src={project.image}
+              alt={project.title}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
           </div>
         </div>
       </div>
 
       {/* Mobile image (always visible) */}
       <div className="md:hidden mt-3">
-        <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted flex items-center justify-center text-muted-foreground text-sm">
-          {project.title} preview
+        <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted">
+          <img
+            src={project.image}
+            alt={project.title}
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
     </div>

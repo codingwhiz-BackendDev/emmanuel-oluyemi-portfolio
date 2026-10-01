@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Briefcase, GraduationCap, Zap } from 'lucide-react';
 import { SplitText } from './SplitText';
 import { experiences } from '@/data';
 
@@ -33,12 +33,27 @@ function ExperienceRow({
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
+  // Get icon based on role/company
+  const getIcon = () => {
+    if (exp.company === 'Orion Labs' || exp.company === 'Self-employed') return Briefcase;
+    if (exp.company === 'SkillBoost Africa' || exp.company === 'Internship') return GraduationCap;
+    if (exp.company === 'Self-taught') return Zap;
+    return Briefcase;
+  };
+
+  const Icon = getIcon();
+
   return (
     <div className="xp-row border-b border-border">
       <button
         onClick={() => setOpen(!open)}
         className="w-full py-5 flex items-center gap-4 text-left group"
       >
+        {/* Icon */}
+        <div className="size-10 rounded-xl bg-accent/50 border border-border flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors">
+          <Icon className="size-5 text-foreground" />
+        </div>
+
         {/* Date (desktop) */}
         <span className="hidden md:block text-sm text-muted-foreground whitespace-nowrap w-[140px] shrink-0">
           {exp.period}
@@ -73,7 +88,7 @@ function ExperienceRow({
       >
         <div className="accordion-inner">
           <div
-            className="pb-5 md:pl-[156px] space-y-3"
+            className="pb-5 md:pl-[240px] space-y-3"
             style={{
               opacity: open ? 1 : 0,
               transition: 'opacity 0.2s var(--ease-out) 0.15s',
@@ -108,7 +123,7 @@ function ExperienceRow({
                 {exp.tech.map((tech) => (
                   <span
                     key={tech}
-                    className="bg-muted text-muted-foreground rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    className="bg-muted/50 border border-border text-muted-foreground rounded-full px-2.5 py-0.5 text-xs font-medium hover:bg-muted hover:border-foreground/20 transition-all"
                   >
                     {tech}
                   </span>

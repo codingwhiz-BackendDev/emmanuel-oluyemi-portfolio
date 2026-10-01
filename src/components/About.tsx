@@ -1,9 +1,16 @@
 import { SplitText } from './SplitText';
 import { FadeUp } from './FadeUp';
 import { profile } from '@/data';
-import { Terminal } from 'lucide-react';
+import { Terminal, Code, Database, Cpu, Wrench } from 'lucide-react';
 
 const asciiChars = '▓*,#=▚&·░@;▒+.%-▞$:';
+
+const skillIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  Languages: Code,
+  Frameworks: Cpu,
+  Databases: Database,
+  Tools: Wrench,
+};
 
 export function About() {
   return (
@@ -50,21 +57,29 @@ export function About() {
         <FadeUp delay={400}>
           <div className="mt-10 pt-8 border-t border-border">
             <h3 className="text-base font-semibold mb-6">Technical Skills</h3>
-            {Object.entries(profile.skills).map(([category, skills]) => (
-              <p key={category} className="mb-3 last:mb-0">
-                <span className="uppercase tracking-wide text-muted-foreground text-sm font-medium">
-                  {category}{' '}
-                </span>
-                <span className="text-foreground">
-                  {skills.map((skill, si) => (
-                    <span key={skill}>
-                      <span className="nav-nudge cursor-default">{skill}</span>
-                      {si < skills.length - 1 && <span className="text-muted-foreground"> · </span>}
+            {Object.entries(profile.skills).map(([category, skills]) => {
+              const Icon = skillIcons[category];
+              return (
+                <div key={category} className="mb-4 last:mb-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    {Icon && <Icon className="size-4 text-muted-foreground" />}
+                    <span className="uppercase tracking-wide text-muted-foreground text-sm font-medium">
+                      {category}
                     </span>
-                  ))}
-                </span>
-              </p>
-            ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2 pl-6">
+                    {skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="bg-muted/50 border border-border rounded-full px-3 py-1 text-sm text-foreground hover:bg-muted hover:border-foreground/20 transition-all"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
 
             {/* Skills notes */}
             <div className="mt-4 space-y-1">
