@@ -1,9 +1,7 @@
 import { SplitText } from './SplitText';
 import { FadeUp } from './FadeUp';
 import { profile } from '@/data';
-import { Code, Database, Cpu, Wrench } from 'lucide-react';
-
-const asciiChars = '▓*,#=▚&·░@;▒+.%-▞$:';
+import { Code, Database, Cpu, Wrench, Zap } from 'lucide-react';
 
 const skillIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   Languages: Code,
@@ -16,6 +14,21 @@ export function About() {
   return (
     <section id="about" className="py-24 md:py-32">
       <div className="container mx-auto max-w-2xl px-4">
+
+        {/* Currently building badge */}
+        <FadeUp>
+          <a
+            href="https://classmillia.onrender.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-2 rounded-full border border-brand/25 bg-brand/5 px-4 py-1.5 text-sm font-medium text-brand hover:bg-brand/10 hover:border-brand/40 transition-all duration-200 mb-8"
+          >
+            <span className="size-2 rounded-full bg-brand animate-pulse" />
+            Currently building ClassMillia
+            <Zap className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </a>
+        </FadeUp>
+
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-12">
           <SplitText text="My Introduction" />
         </h2>
@@ -38,18 +51,27 @@ export function About() {
         {/* Skills */}
         <FadeUp delay={400}>
           <div className="mt-10 pt-8 border-t border-border">
-            <h3 className="text-base font-semibold mb-6">Technical Skills</h3>
+            <h3 className="text-base font-semibold mb-6 flex items-center gap-2">
+              Technical Skills
+              <span className="text-xs font-normal text-muted-foreground bg-muted/60 border border-border rounded-full px-2 py-0.5">
+                {Object.values(profile.skills).flat().length} technologies
+              </span>
+            </h3>
             {Object.entries(profile.skills).map(([category, skills]) => {
               const Icon = skillIcons[category];
               return (
-                <div key={category} className="mb-4 last:mb-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    {Icon && <Icon className="size-4 text-muted-foreground" />}
-                    <span className="uppercase tracking-wide text-muted-foreground text-sm font-medium">
+                <div key={category} className="mb-5 last:mb-0">
+                  <div className="flex items-center gap-2 mb-2.5">
+                    {Icon && (
+                      <div className="size-6 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center">
+                        <Icon className="size-3.5 text-brand" />
+                      </div>
+                    )}
+                    <span className="uppercase tracking-widest text-muted-foreground text-xs font-semibold">
                       {category}
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-2 pl-6">
+                  <div className="flex flex-wrap gap-2 pl-8">
                     {skills.map((skill) => (
                       <span
                         key={skill}
@@ -64,7 +86,7 @@ export function About() {
             })}
 
             {/* Skills notes */}
-            <div className="mt-4 space-y-1">
+            <div className="mt-5 space-y-1.5 pl-8">
               {profile.intro.skillsNote.map((note, i) => (
                 <p key={i} className="text-sm text-muted-foreground">
                   <span className="text-foreground font-medium">{note.label}</span>{' '}
@@ -75,39 +97,13 @@ export function About() {
           </div>
         </FadeUp>
 
-        {/* ASCII divider */}
-        <div className="mt-10 overflow-hidden">
-          <div className="font-mono text-sm text-muted-foreground select-none">
-            {asciiChars.split('').map((char, i) => (
-              <span
-                key={i}
-                className="inline-block"
-                style={{
-                  opacity: 0.55,
-                  transform: 'translateY(0.12em)',
-                  transition: 'opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out)',
-                  transitionDelay: `${i * 20}ms`,
-                }}
-              >
-                {char}
-              </span>
-            ))}
-            {asciiChars.split('').map((char, i) => (
-              <span
-                key={`r-${i}`}
-                className="inline-block"
-                style={{
-                  opacity: 0.55,
-                  transform: 'translateY(0.12em)',
-                  transition: 'opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out)',
-                  transitionDelay: `${(asciiChars.length + i) * 20}ms`,
-                }}
-              >
-                {char}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* Gradient divider */}
+        <div
+          className="mt-12 h-px w-full"
+          style={{
+            background: 'linear-gradient(to right, transparent, hsl(var(--brand) / 0.4), transparent)',
+          }}
+        />
       </div>
     </section>
   );

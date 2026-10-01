@@ -276,6 +276,16 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--brand) / 0.4); }
+  50%       { box-shadow: 0 0 0 6px hsl(var(--brand) / 0);  }
+}
+
 /* Animation utility helpers */
 .animate-glow-pulse { animation: glowPulse 5s ease-in-out infinite; }
 .animate-gradient {
@@ -459,4 +469,36 @@ html {
   background-color: hsl(var(--accent));
   transition: left 0.35s var(--ease-out), width 0.35s var(--ease-out), opacity 0.25s var(--ease-out);
   z-index: 0;
+}
+
+/* Section label */
+.section-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--brand));
+  background: hsl(var(--brand) / 0.08);
+  border: 1px solid hsl(var(--brand) / 0.2);
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+/* Gradient separator */
+.gradient-sep {
+  height: 1px;
+  background: linear-gradient(to right, transparent, hsl(var(--brand) / 0.35), transparent);
+  margin: 0;
+}
+
+/* Hover scale helper */
+.hover-lift {
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s var(--ease-out);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px -8px hsl(var(--brand) / 0.2);
 }

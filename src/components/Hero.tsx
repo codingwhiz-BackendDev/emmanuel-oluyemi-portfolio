@@ -1,4 +1,4 @@
-import { ArrowDown, Twitter, Github, Linkedin, Mail } from 'lucide-react';
+import { ArrowDown, ArrowUpRight, Twitter, Github, Linkedin, Mail } from 'lucide-react';
 import { SplitText } from './SplitText';
 import { profile } from '@/data';
 
@@ -133,7 +133,7 @@ export function Hero() {
 
         {/* Buttons */}
         <div
-          className="flex gap-3 mt-2"
+          className="flex flex-wrap gap-3 mt-2 justify-center"
           style={{
             opacity: 0,
             animation: 'fadeInUp 0.7s var(--ease-out) 1.2s forwards',
@@ -154,6 +154,33 @@ export function Hero() {
             <span>Get in touch</span>
           </a>
         </div>
+
+        {/* Featured project teaser */}
+        <a
+          href="https://classmillia.onrender.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group mt-10 flex items-center gap-3 rounded-2xl border border-border bg-background/60 backdrop-blur-sm px-4 py-3 hover:border-brand/40 hover:bg-brand/5 hover:shadow-lg hover:shadow-brand/10 transition-all duration-300 max-w-sm"
+          style={{
+            opacity: 0,
+            animation: 'fadeInUp 0.7s var(--ease-out) 1.5s forwards',
+          }}
+        >
+          <div className="size-9 rounded-xl overflow-hidden shrink-0 border border-border">
+            <img src="/images/portfolio/classmillia.jpg" alt="ClassMillia" className="w-full h-full object-cover" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-foreground">ClassMillia</span>
+              <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-500">
+                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground truncate">AI academic platform for universities</p>
+          </div>
+          <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0 ml-auto" />
+        </a>
 
         {/* Scroll down */}
         <a

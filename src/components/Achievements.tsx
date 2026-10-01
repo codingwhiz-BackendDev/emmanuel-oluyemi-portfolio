@@ -14,6 +14,7 @@ export function Achievements() {
   return (
     <section className="py-24 md:py-32">
       <div className="container mx-auto max-w-4xl px-4">
+        <p className="section-label">Milestones</p>
         <h2 className="text-3xl md:text-4xl font-display font-bold mb-12">
           <SplitText text="My Success Story" />
         </h2>
