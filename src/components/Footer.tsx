@@ -31,7 +31,7 @@ export function Footer() {
               EO
             </span>
             <span className="text-sm text-muted-foreground">
-              © 2025 {profile.name}
+              © 2025 {profile.name}. Built from Nigeria.
             </span>
           </div>
 
@@ -60,8 +60,7 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             <span className="font-accent text-base text-foreground">
               <SplitText text="Let's build something great together" charDelay={15} />
-            </span>{' '}
-            🇳🇬
+            </span>
           </p>
         </div>
       </div>

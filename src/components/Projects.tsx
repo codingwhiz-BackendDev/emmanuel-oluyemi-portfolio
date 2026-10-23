@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SplitText } from './SplitText';
+import { FadeUp } from './FadeUp';
 import { projects } from '@/data';
 
 export function Projects() {
@@ -12,19 +13,24 @@ export function Projects() {
     <section id="projects" className="py-24 md:py-32">
       <div className="container mx-auto px-4">
         <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase mb-4">
-          Selected Work
+          My Recent Work
         </p>
-        <h2 className="text-3xl md:text-4xl font-display font-bold mb-10">
+        <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
           <SplitText text="Things I've built" />
         </h2>
+        <FadeUp delay={100}>
+          <p className="text-lg text-muted-foreground leading-relaxed mb-10 max-w-xl">
+            A collection of projects ranging from AI-powered apps to automation tools.
+          </p>
+        </FadeUp>
 
         {/* Filter tabs */}
-        <div className="flex gap-1 mb-4 border-b border-border">
+        <div className="flex flex-wrap gap-1 mb-4 border-b border-border overflow-x-auto">
           {tags.map((tag) => (
             <button
               key={tag}
               onClick={() => setFilter(tag)}
-              className={`relative pb-3 pt-2 px-3 text-sm font-medium transition-colors ${
+              className={`relative pb-3 pt-2 px-3 text-sm font-medium transition-colors whitespace-nowrap ${
                 filter === tag
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
@@ -60,10 +66,8 @@ function ProjectRow({
   index: number;
 }) {
   return (
-    <a
-      href="#projects"
-      onClick={(e) => e.preventDefault()}
-      className="xp-row group block border-b border-border py-5 transition-opacity duration-200"
+    <div
+      className="xp-row proj-row group border-b border-border py-5 transition-opacity duration-200"
       style={{
         opacity: 0,
         animation: `fadeIn 0.4s var(--ease-out) ${index * 50}ms forwards`,
@@ -88,12 +92,21 @@ function ProjectRow({
         </span>
       </div>
 
-      {/* Mobile image */}
+      {/* Desktop hover image */}
+      <div className="proj-image-wrap mt-0">
+        <div>
+          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1 flex items-center justify-center text-muted-foreground text-sm">
+            {project.title} preview
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile image (always visible) */}
       <div className="md:hidden mt-3">
         <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted flex items-center justify-center text-muted-foreground text-sm">
           {project.title} preview
         </div>
       </div>
-    </a>
+    </div>
   );
 }

@@ -18,8 +18,7 @@ export function Hero() {
           animation: 'fadeIn 0.6s var(--ease-out) 0.1s forwards',
         }}
       >
-        <div className="size-24 md:size-28 rounded-full border border-border overflow-hidden object-cover object-top transition-transform duration-200 group-hover:rotate-3 group-hover:scale-105">
-          {/* Placeholder image - user will replace */}
+        <div className="size-24 md:size-28 rounded-full border border-border overflow-hidden transition-transform duration-200 group-hover:rotate-3 group-hover:scale-105">
           <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-sm font-medium">
             Photo
           </div>
@@ -44,9 +43,9 @@ export function Hero() {
           animation: 'fadeIn 0.6s var(--ease-out) 0.8s forwards',
         }}
       >
-        I build reliable systems that scale (and feel{' '}
-        <span className="font-accent text-[1.3em] text-foreground">good</span>).
-        Backend systems, APIs, databases, and automation.
+        A 20-year-old Backend Developer from Nigeria building scalable, secure web
+        applications with Django &amp; Python — turning ideas into real{' '}
+        <span className="font-accent text-[1.3em] text-foreground">products</span>.
       </p>
 
       {/* Social line */}
@@ -103,7 +102,7 @@ export function Hero() {
           View my work
         </a>
         <a
-          href={profile.socials.email}
+          href="#contact"
           className="border border-input bg-background rounded-full h-11 px-8 flex items-center font-medium text-sm hover:bg-accent active:scale-[0.97] transition-all duration-150"
           style={{ transitionTimingFunction: 'var(--ease-out)' }}
         >
@@ -122,8 +121,6 @@ export function Hero() {
           style={{ animation: 'gentle-bounce 2.4s ease-in-out infinite' }}
         />
       </a>
-
-      <style>{`@keyframes fadeIn { to { opacity: 1; } }`}</style>
     </section>
   );
 }
