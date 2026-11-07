@@ -21,25 +21,53 @@ function App() {
       <Navbar />
       <main id="main-content" tabIndex={-1}>
         <Hero />
-        <div
-          className="discipline-band"
-          aria-label="Web development, backend engineering, mobile experiences, and creative problem solving"
-        >
-          <div className="discipline-track" aria-hidden="true">
-            {[0, 1].map((copy) => (
-              <div key={copy}>
-                <span>WEB DEVELOPMENT</span>
-                <b>✳</b>
-                <span>BACKEND ENGINEERING</span>
-                <b>✳</b>
-                <span>MOBILE EXPERIENCES</span>
-                <b>✳</b>
-                <span>CREATIVE PROBLEM SOLVING</span>
-                <b>✳</b>
-              </div>
-            ))}
+        <section className="discipline-band" aria-label="Areas of expertise">
+          <p className="sr-only">
+            Web development, backend engineering, mobile experiences, and
+            creative problem solving.
+          </p>
+          <div className="discipline-caption" aria-hidden="true">
+            <span>
+              <i /> THE INTERSECTION OF LOGIC & IMAGINATION
+            </span>
+            <span>FOUR DISCIPLINES. ONE BUILDER.</span>
           </div>
-        </div>
+          <div className="discipline-window" aria-hidden="true">
+            <div className="discipline-track">
+              {[0, 1].map((copy) => (
+                <div className="discipline-group" key={copy}>
+                  {[
+                    { title: "WEB DEVELOPMENT", note: "IDEA → INTERFACE" },
+                    { title: "BACKEND ENGINEERING", note: "LOGIC → SCALE" },
+                    { title: "MOBILE EXPERIENCES", note: "TOUCH → CONNECTION" },
+                    {
+                      title: "CREATIVE PROBLEM SOLVING",
+                      note: "WHAT IF → WHAT’S NEXT",
+                    },
+                  ].map(({ title, note }, index) => (
+                    <div className="discipline-item" key={title}>
+                      <div className="discipline-wordmark">
+                        <span className="discipline-index">
+                          0{index + 1} / {note}
+                        </span>
+                        <span
+                          className={`discipline-name ${index % 2 ? "discipline-outline" : ""}`}
+                        >
+                          {title}
+                        </span>
+                      </div>
+                      <span className="discipline-spark">✳</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="discipline-footnote" aria-hidden="true">
+            <span>DIFFERENT DISCIPLINES. SAME ATTENTION TO DETAIL.</span>
+            <span>BUILT TO MOVE YOU ↗</span>
+          </div>
+        </section>
         <About />
         <Projects />
         <Services />

@@ -1131,33 +1131,153 @@ main:focus {
     animation-delay: 0.15s;
 }
 .discipline-band {
-    background: var(--lime);
-    padding: 21px 0;
+    position: relative;
+    isolation: isolate;
     overflow: hidden;
-    border-block: 1px solid #18191c;
+    padding: 28px 0 34px;
+    background: hsl(var(--background));
+}
+.discipline-band::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 76px;
+    left: -40px;
+    width: calc(100% + 80px);
+    height: 137px;
+    background: hsl(var(--brand));
+    transform: rotate(2deg);
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0 79px,
+        #ffffff18 79px 80px
+    );
+}
+.discipline-caption,
+.discipline-footnote {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    color: hsl(var(--muted-foreground));
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+}
+.discipline-caption {
+    margin-bottom: 35px;
+}
+.discipline-caption > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+.discipline-caption i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: hsl(var(--brand));
+}
+.discipline-window {
+    position: relative;
+    width: calc(100% + 80px);
+    margin-left: -40px;
+    padding-block: 24px;
+    transform: rotate(-1.8deg);
+    background: #191a1e;
+    border-block: 1px solid #ffffff20;
+    box-shadow: 0 12px 25px #18191c20;
+}
+.discipline-window::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        90deg,
+        #191a1e,
+        transparent 7%,
+        transparent 93%,
+        #191a1e
+    );
 }
 .discipline-track {
     display: flex;
     width: max-content;
-    animation: marquee-left 40s linear infinite;
+    animation: marquee-left 52s linear infinite;
 }
-.discipline-track > div {
+.discipline-group {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
-    gap: 38px;
-    padding-right: 38px;
 }
-.discipline-track span {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+.discipline-item {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 35px;
+    padding-right: 35px;
+}
+.discipline-wordmark {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+.discipline-index {
+    color: #b1b1b7;
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
     white-space: nowrap;
 }
-.discipline-track b {
-    font-size: 24px;
+.discipline-name {
+    font-family: "Bricolage Grotesque", sans-serif;
+    color: var(--lime);
+    font-size: clamp(32px, 3.6vw, 58px);
+    font-weight: 700;
     line-height: 1;
+    letter-spacing: -0.035em;
+    white-space: nowrap;
 }
-.discipline-band:hover .discipline-track {
+.discipline-outline {
+    color: #f7f7f2;
+}
+@supports (-webkit-text-stroke: 1px white) {
+    .discipline-outline {
+        color: transparent;
+        -webkit-text-stroke: 1px #f7f7f2;
+    }
+}
+.discipline-spark {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border: 1px solid #d7fa7740;
+    border-radius: 50%;
+    color: var(--lime);
+    font-size: 44px;
+    line-height: 1;
+    animation: studio-turn 18s linear infinite;
+}
+.discipline-item:nth-child(even) .discipline-spark {
+    color: #bea4ff;
+    border-color: #bea4ff40;
+    animation-direction: reverse;
+}
+.discipline-footnote {
+    margin-top: 38px;
+    font-size: 7px;
+}
+.discipline-footnote > span:last-child {
+    color: hsl(var(--brand));
+}
+.discipline-band:hover .discipline-track,
+.discipline-band:hover .discipline-spark {
     animation-play-state: paused;
 }
 .studio-section {
@@ -1512,6 +1632,7 @@ main:focus {
 .motion-control:hover {
     border-color: hsl(var(--brand));
 }
+.motion-paused .discipline-spark,
 .motion-paused .discipline-track,
 .motion-paused .floating-label,
 .motion-paused .hero-asterisk,
@@ -1682,14 +1803,45 @@ main:focus {
         gap: 10px;
     }
     .discipline-band {
-        padding: 16px 0;
+        padding: 24px 0;
     }
-    .discipline-track span {
-        font-size: 10px;
+    .discipline-caption,
+    .discipline-footnote {
+        padding-inline: 22px;
+        font-size: 7px;
     }
-    .discipline-track > div {
-        gap: 25px;
-        padding-right: 25px;
+    .discipline-caption > span:last-child,
+    .discipline-footnote > span:first-child {
+        display: none;
+    }
+    .discipline-caption {
+        margin-bottom: 26px;
+    }
+    .discipline-band::before {
+        top: 59px;
+        height: 111px;
+    }
+    .discipline-window {
+        padding-block: 20px;
+    }
+    .discipline-item {
+        gap: 22px;
+        padding-right: 22px;
+    }
+    .discipline-name {
+        font-size: 33px;
+    }
+    .discipline-index {
+        font-size: 7px;
+    }
+    .discipline-spark {
+        width: 46px;
+        height: 46px;
+        font-size: 32px;
+    }
+    .discipline-footnote {
+        margin-top: 29px;
+        justify-content: flex-end;
     }
     .studio-section {
         padding: 65px 22px;
@@ -1831,8 +1983,44 @@ main:focus {
     .hero-enter {
         animation: none;
     }
+    .discipline-band::before {
+        display: none;
+    }
+    .discipline-window {
+        transform: none;
+        width: 100%;
+        margin-left: 0;
+    }
+    .discipline-window::after {
+        display: none;
+    }
     .discipline-track {
         animation: none;
+        width: 100%;
+    }
+    .discipline-group {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 24px;
+        width: 100%;
+        padding-inline: 22px;
+    }
+    .discipline-group + .discipline-group {
+        display: none;
+    }
+    .discipline-item {
+        max-width: 100%;
+        padding-right: 0;
+    }
+    .discipline-name {
+        white-space: normal;
+        font-size: clamp(22px, 3.6vw, 42px);
+    }
+    .discipline-spark {
+        animation: none;
+        width: 36px;
+        height: 36px;
+        font-size: 25px;
     }
     .floating-label {
         animation: none;
