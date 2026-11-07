@@ -1,180 +1,230 @@
-import { useState } from 'react';
-import { SplitText } from './SplitText';
-import { FadeUp } from './FadeUp';
-import { projects } from '@/data';
-import { ProjectModal } from './ProjectModal';
-import { Globe, Bot, Trophy, Rocket, Wrench, ArrowUpRight } from 'lucide-react';
+import { useCallback, useRef, useState } from "react";
+import { ArrowDown, ArrowUp, ArrowUpRight } from "lucide-react";
+import { projects } from "@/data";
+import { ProjectModal, ProjectStatus } from "./ProjectModal";
 
 type Project = (typeof projects)[number];
 
+const INITIAL_COUNT = 6;
+const categories = ["All", ...new Set(projects.map((project) => project.tag))];
+
 export function Projects() {
-  const [filter, setFilter] = useState('All');
+  const [filter, setFilter] = useState("All");
+  const [showAll, setShowAll] = useState(false);
   const [selected, setSelected] = useState<Project | null>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const closeProject = useCallback(() => setSelected(null), []);
 
-  const tags = ['All', 'Web App', 'AI', 'Hackathon', 'SaaS', 'Tool'];
-  const tagIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-    'Web App':  Globe,
-    'AI':       Bot,
-    'Hackathon':Trophy,
-    'SaaS':     Rocket,
-    'Tool':     Wrench,
-  };
-
-  const filtered = filter === 'All' ? projects : projects.filter((p) => p.tag === filter);
+  const filtered =
+    filter === "All"
+      ? projects
+      : projects.filter((project) => project.tag === filter);
+  const visible = showAll ? filtered : filtered.slice(0, INITIAL_COUNT);
 
   return (
     <>
-      <section id="projects" className="py-24 md:py-32">
-        <div className="container mx-auto px-4">
-          <p className="text-sm font-medium text-muted-foreground tracking-widest uppercase mb-4">
-            My Recent Work
-          </p>
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-            <SplitText text="Things I've built" />
-          </h2>
-          <FadeUp delay={100}>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-10 max-w-xl">
-              A collection of projects ranging from AI-powered apps to automation tools.
-              Click any project to learn more.
+      <section
+        id="projects"
+        aria-labelledby="projects-heading"
+        className="border-y border-border bg-background bg-gradient-to-br from-amber-50/60 via-background to-muted/50 py-20 md:py-28"
+      >
+        <div className="mx-auto max-w-6xl px-5 sm:px-8 md:px-10">
+          <header className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-dark">
+                <span aria-hidden="true" className="h-px w-8 bg-brand" />
+                The project collection
+              </p>
+              <h2
+                id="projects-heading"
+                className="font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl"
+              >
+                Ideas turned
+                <br />
+                <span className="text-brand-dark">into interfaces.</span>
+              </h2>
+            </div>
+            <p className="max-w-sm text-base leading-relaxed text-muted-foreground">
+              Web apps, AI experiments, and developer tools. Explore the work,
+              the details, and the technology behind each project.
             </p>
-          </FadeUp>
+          </header>
 
-          {/* Filter tabs */}
-          <div className="flex flex-wrap gap-1 mb-6 border-b border-border overflow-x-auto">
-            {tags.map((tag) => {
-              const Icon = tagIcons[tag];
-              const isActive = filter === tag;
+          <div
+            role="group"
+            aria-label="Filter projects by category"
+            className="mb-6 flex flex-wrap gap-2 border-y border-border py-5"
+          >
+            {categories.map((category) => {
+              const count =
+                category === "All"
+                  ? projects.length
+                  : projects.filter((project) => project.tag === category)
+                      .length;
+              const active = filter === category;
+
               return (
                 <button
-                  key={tag}
-                  onClick={() => setFilter(tag)}
-                  className={`relative pb-3 pt-2 px-3 text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
-                    isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  key={category}
+                  type="button"
+                  aria-pressed={active}
+                  aria-controls="project-gallery"
+                  onClick={() => {
+                    setFilter(category);
+                    setShowAll(false);
+                  }}
+                  className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    active
+                      ? "border-brand-dark bg-brand-dark text-brand-foreground"
+                      : "border-border bg-background/70 text-muted-foreground hover:border-brand/40 hover:text-foreground"
                   }`}
                 >
-                  {Icon && <Icon className={`size-4 transition-colors ${isActive ? 'text-brand' : ''}`} />}
-                  {tag}
-                  {isActive && (
-                    <span
-                      className="absolute -bottom-px left-0 right-0 h-[2px] rounded-full bg-brand-gradient"
-                      style={{ transition: 'all 0.3s var(--ease-out)' }}
-                    />
-                  )}
+                  {category}
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${active ? "bg-white/15" : "bg-muted text-muted-foreground"}`}
+                  >
+                    {count}
+                  </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Project list */}
-          <div className="xp-list">
-            {filtered.map((project, i) => (
-              <ProjectRow
-                key={project.title}
-                project={project}
-                index={i}
-                onClick={() => setSelected(project)}
-              />
+          <p
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="mb-6 text-xs font-medium tracking-wide text-muted-foreground"
+          >
+            Showing {visible.length} of {filtered.length} projects
+            {filter !== "All" ? ` in ${filter}` : ""}
+          </p>
+
+          <ul
+            id="project-gallery"
+            className="grid list-none grid-cols-1 gap-x-6 gap-y-9 p-0 md:grid-cols-2 md:gap-y-12"
+          >
+            {visible.map((project) => (
+              <li key={project.title} className="min-w-0">
+                <ProjectCard
+                  project={project}
+                  onOpen={() => setSelected(project)}
+                />
+              </li>
             ))}
-          </div>
+          </ul>
+
+          {filtered.length > INITIAL_COUNT && (
+            <div className="mt-10 flex justify-center border-t border-border pt-8">
+              <button
+                ref={toggleRef}
+                type="button"
+                aria-expanded={showAll}
+                aria-controls="project-gallery"
+                onClick={() => {
+                  if (showAll) {
+                    // Keep the focused control in view when the long gallery collapses.
+                    toggleRef.current?.focus({ preventScroll: true });
+                    requestAnimationFrame(() =>
+                      toggleRef.current?.scrollIntoView({
+                        block: "nearest",
+                        behavior: "instant",
+                      }),
+                    );
+                  }
+                  setShowAll((expanded) => !expanded);
+                }}
+                className="inline-flex min-h-12 items-center gap-3 rounded-full border border-brand/30 bg-background px-6 py-3 text-sm font-semibold text-brand-dark transition-colors hover:bg-brand/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                {showAll
+                  ? "Show fewer projects"
+                  : `Show ${filtered.length - INITIAL_COUNT} more projects`}
+                {showAll ? (
+                  <ArrowUp aria-hidden="true" className="size-4" />
+                ) : (
+                  <ArrowDown aria-hidden="true" className="size-4" />
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
-      <ProjectModal project={selected} onClose={() => setSelected(null)} />
+      <ProjectModal project={selected} onClose={closeProject} />
     </>
   );
 }
 
-function ProjectRow({
+function ProjectCard({
   project,
-  index,
-  onClick,
+  onOpen,
 }: {
   project: Project;
-  index: number;
-  onClick: () => void;
+  onOpen: () => void;
 }) {
-  const hasLink = project.link !== '#';
-
   return (
-    <div
-      className="xp-row proj-row group border-b border-border py-5 cursor-pointer transition-all duration-200"
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-      style={{
-        opacity: 0,
-        animation: `fadeIn 0.4s var(--ease-out) ${index * 45}ms forwards`,
-      }}
-    >
-      <div className="flex items-baseline justify-between gap-4 px-1">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h3 className="text-base md:text-lg font-semibold truncate group-hover:text-brand transition-colors duration-200">
-              {project.title}
-            </h3>
-            <span className="shrink-0 rounded-full bg-brand/10 text-brand px-2.5 py-0.5 text-xs font-medium border border-brand/20">
-              {project.tag}
-            </span>
-            {hasLink && (
-              <span className="shrink-0 hidden md:inline-flex items-center gap-1 rounded-full bg-emerald-400/10 text-emerald-500 px-2.5 py-0.5 text-xs font-medium border border-emerald-400/20">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live
-              </span>
-            )}
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground line-clamp-2 max-w-xl md:max-w-2xl leading-relaxed">
-            {project.description}
-          </p>
-          {/* Tech pills */}
-          {project.tech && (
-            <div className="hidden md:flex flex-wrap gap-1.5 mt-2">
-              {project.tech.slice(0, 4).map((t) => (
-                <span key={t} className="text-[11px] bg-muted/60 border border-border rounded-full px-2 py-0.5 text-muted-foreground">
-                  {t}
-                </span>
-              ))}
-              {project.tech.length > 4 && (
-                <span className="text-[11px] bg-muted/60 border border-border rounded-full px-2 py-0.5 text-muted-foreground">
-                  +{project.tech.length - 4} more
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="text-sm text-muted-foreground hidden md:block">
-            #{String(index + 1).padStart(2, '0')}
+    <article className="group relative flex h-full flex-col rounded-2xl">
+      <span className="relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border bg-muted p-3 transition-colors group-hover:border-brand/40 sm:p-5">
+        <img
+          src={project.image}
+          alt={`${project.title} project preview`}
+          loading="lazy"
+          decoding="async"
+          width={1200}
+          height={900}
+          className="h-full w-full rounded-lg border border-border/70 bg-background object-contain shadow-sm transition-transform duration-500 motion-safe:group-hover:scale-[1.025]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute bottom-5 right-5 flex size-11 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-colors group-hover:border-brand-dark group-hover:bg-brand-dark group-hover:text-brand-foreground sm:bottom-7 sm:right-7"
+        >
+          <ArrowUpRight className="size-5" />
+        </span>
+      </span>
+
+      <span className="mt-5 flex w-full flex-wrap items-center justify-between gap-2 text-xs">
+        <span className="font-semibold uppercase tracking-[0.12em] text-brand-dark">
+          {project.tag}{" "}
+          <span className="mx-1 text-muted-foreground" aria-hidden="true">
+            /
+          </span>{" "}
+          <span className="font-normal text-muted-foreground">
+            {project.year}
           </span>
-          <div className="size-8 rounded-full border border-border flex items-center justify-center group-hover:border-brand/40 group-hover:bg-brand/10 transition-all duration-200">
-            <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop hover image */}
-      <div className="proj-image-wrap mt-0 px-1">
-        <div>
-          <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted mt-3 mb-1 group-hover:border-brand/30 transition-colors">
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile image */}
-      <div className="md:hidden mt-3 px-1">
-        <div className="aspect-video rounded-xl overflow-hidden border border-border bg-muted">
-          <img
-            src={project.image}
-            alt={project.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-    </div>
+        </span>
+        <ProjectStatus project={project} />
+      </span>
+      <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-brand-dark sm:text-3xl">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.currentTarget.focus({ preventScroll: true });
+            onOpen();
+          }}
+          aria-label={`View details for ${project.title}`}
+          aria-haspopup="dialog"
+          className="text-left after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand focus-visible:after:ring-offset-4 focus-visible:after:ring-offset-background"
+        >
+          {project.title}
+        </button>
+      </h3>
+      <span className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+        {project.description}
+      </span>
+      <span className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        {project.tech.slice(0, 3).map((technology) => (
+          <span key={technology}>{technology}</span>
+        ))}
+        {project.tech.length > 3 && (
+          <span>+{project.tech.length - 3} more</span>
+        )}
+      </span>
+      <span
+        aria-hidden="true"
+        className="mt-5 text-sm font-medium text-brand-dark underline decoration-brand/30 underline-offset-4 group-hover:decoration-brand-dark"
+      >
+        View project details
+      </span>
+    </article>
   );
 }

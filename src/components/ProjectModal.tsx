@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { X, ExternalLink, CheckCircle2, Zap, Clock, Users } from 'lucide-react';
-import { projects } from '@/data';
+import { useEffect, useId, useRef } from "react";
+import { ArrowUpRight, Check, X } from "lucide-react";
+import { projects } from "@/data";
 
 type Project = (typeof projects)[number];
 
@@ -9,180 +9,276 @@ interface ProjectModalProps {
   onClose: () => void;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  live:      { label: 'Live',         color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/25', icon: CheckCircle2 },
-  building:  { label: 'In Progress',  color: 'text-amber-400  bg-amber-400/10  border-amber-400/25',   icon: Zap          },
-  hackathon: { label: 'Hackathon',    color: 'text-brand      bg-brand/10      border-brand/25',       icon: Users        },
-  client:    { label: 'Client Work',  color: 'text-sky-400    bg-sky-400/10    border-sky-400/25',     icon: Clock        },
-};
+function projectLink(project: Project) {
+  try {
+    const url = new URL(project.link);
+    return url.protocol === "https:" || url.protocol === "http:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+export function ProjectStatus({ project }: { project: Project }) {
+  const link = projectLink(project);
+  const statuses: Record<string, { label: string; className: string }> = {
+    live: link
+      ? {
+          label: link.hostname === "pypi.org" ? "Published package" : "Live",
+          className: "border-emerald-700/20 bg-emerald-50 text-emerald-800",
+        }
+      : {
+          label: "No public link",
+          className: "border-border bg-muted text-muted-foreground",
+        },
+    building: {
+      label: "In progress",
+      className: "border-amber-700/20 bg-amber-50 text-amber-800",
+    },
+    hackathon: {
+      label: "Hackathon project",
+      className: "border-brand/20 bg-brand/5 text-brand-dark",
+    },
+    client: {
+      label: "Client work",
+      className: "border-sky-700/20 bg-sky-50 text-sky-800",
+    },
+  };
+  const status = statuses[project.status] ?? {
+    label: "Status not listed",
+    className: "border-border bg-muted text-muted-foreground",
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${status.className}`}
+    >
+      {status.label}
+    </span>
+  );
+}
 
 export function ProjectModal({ project, onClose }: ProjectModalProps) {
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const panelRef    = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const backdropPressRef = useRef(false);
+  const titleId = useId();
 
-  /* lock body scroll */
   useEffect(() => {
-    if (!project) return;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    const dialog = dialogRef.current;
+    if (!project || !dialog) return;
+
+    const opener =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const body = document.body;
+    const root = document.documentElement;
+    const savedStyles = [
+      { element: body, property: "overflow" },
+      { element: body, property: "padding-right" },
+      { element: root, property: "overflow" },
+    ].map(({ element, property }) => ({
+      element,
+      property,
+      value: element.style.getPropertyValue(property),
+      priority: element.style.getPropertyPriority(property),
+    }));
+    const scrollbarWidth = window.innerWidth - root.clientWidth;
+    const bodyPadding =
+      parseFloat(window.getComputedStyle(body).paddingRight) || 0;
+
+    dialog.showModal();
+    body.style.setProperty("overflow", "hidden");
+    root.style.setProperty("overflow", "hidden");
+    if (scrollbarWidth > 0) {
+      body.style.setProperty(
+        "padding-right",
+        `${bodyPadding + scrollbarWidth}px`,
+      );
+    }
+    dialog.scrollTop = 0;
+    closeRef.current?.focus({ preventScroll: true });
+
+    return () => {
+      if (dialog.open) dialog.close();
+      savedStyles.forEach(({ element, property, value, priority }) => {
+        if (value) element.style.setProperty(property, value, priority);
+        else element.style.removeProperty(property);
+      });
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
+    };
   }, [project]);
-
-  /* close on ESC */
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
 
   if (!project) return null;
 
-  const hasLink  = project.link !== '#';
-  const status   = statusConfig[project.status] ?? statusConfig.live;
-  const StatusIcon = status.icon;
+  const link = projectLink(project);
+  const isPackage = link?.hostname === "pypi.org";
+  const isOutside = (clientX: number, clientY: number) => {
+    const bounds = dialogRef.current?.getBoundingClientRect();
+    return (
+      !!bounds &&
+      (clientX < bounds.left ||
+        clientX > bounds.right ||
+        clientY < bounds.top ||
+        clientY > bounds.bottom)
+    );
+  };
 
   return (
-    /* Backdrop */
-    <div
-      ref={backdropRef}
-      onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
-      className="fixed inset-0 z-[100] flex items-end md:items-center justify-center"
-      style={{ background: 'hsl(var(--ink) / 0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
-      role="dialog"
-      aria-modal="true"
-      aria-label={project.title}
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onPointerDown={(event) => {
+        backdropPressRef.current =
+          event.target === event.currentTarget &&
+          isOutside(event.clientX, event.clientY);
+      }}
+      onClick={(event) => {
+        if (
+          backdropPressRef.current &&
+          event.target === event.currentTarget &&
+          isOutside(event.clientX, event.clientY)
+        )
+          onClose();
+        backdropPressRef.current = false;
+      }}
+      className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%_-_1.5rem)] max-w-4xl overflow-y-auto overscroll-contain rounded-2xl border border-border bg-background p-0 text-foreground shadow-2xl backdrop:bg-ink/70 backdrop:backdrop-blur-sm sm:max-h-[92dvh] sm:w-[calc(100%_-_3rem)] sm:rounded-3xl"
     >
-      {/* Panel */}
-      <div
-        ref={panelRef}
-        className="relative w-full md:max-w-2xl max-h-[92dvh] bg-background border border-border rounded-t-3xl md:rounded-3xl overflow-hidden flex flex-col shadow-2xl"
-        style={{ animation: 'modalIn 0.38s var(--ease-spring) forwards' }}
-      >
-        {/* Hero image */}
-        <div className="relative aspect-video w-full shrink-0 overflow-hidden bg-muted">
+      <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-border bg-background px-5 py-5 sm:px-8 sm:py-6">
+        <div className="min-w-0">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-brand-dark">
+            {project.tag}{" "}
+            <span aria-hidden="true" className="mx-1 text-muted-foreground">
+              /
+            </span>{" "}
+            {project.year}
+          </p>
+          <h2
+            id={titleId}
+            className="break-words font-display text-2xl font-semibold leading-tight tracking-tight sm:text-3xl"
+          >
+            {project.title}
+          </h2>
+        </div>
+        <button
+          ref={closeRef}
+          type="button"
+          onClick={onClose}
+          aria-label="Close project details"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-foreground transition-colors hover:border-brand/40 hover:bg-brand/5 hover:text-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <X aria-hidden="true" className="size-5" />
+        </button>
+      </header>
+
+      <div className="p-5 sm:p-8">
+        <div className="overflow-hidden rounded-xl border border-border bg-muted p-2 sm:p-4">
           <img
             src={project.image}
-            alt={project.title}
-            className="w-full h-full object-cover"
+            alt={`${project.title} project preview`}
+            loading="lazy"
+            decoding="async"
+            width={1600}
+            height={900}
+            className="aspect-video w-full rounded-lg bg-background object-contain"
           />
-          {/* Image gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-background hover:scale-110 transition-all duration-200"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-          </button>
-
-          {/* Status badge */}
-          <div className="absolute top-4 left-4">
-            <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border ${status.color}`}>
-              <StatusIcon className="size-3.5" />
-              {status.label}
-            </span>
-          </div>
-
-          {/* Year badge */}
-          <div className="absolute bottom-4 right-4">
-            <span className="text-xs font-medium text-white/70 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
-              {project.year}
-            </span>
-          </div>
         </div>
 
-        {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 overscroll-contain">
-          <div className="p-6 md:p-8 space-y-6">
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-display font-bold mb-1">{project.title}</h2>
-                <span className="inline-block bg-brand/10 text-brand border border-brand/20 rounded-full px-3 py-0.5 text-xs font-medium">
-                  {project.tag}
-                </span>
-              </div>
-              {hasLink && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary shrink-0 rounded-full h-10 px-5 flex items-center gap-2 text-sm font-medium transition-all"
+        <div className="mt-7 grid gap-8 sm:mt-8 md:grid-cols-[minmax(0,1fr)_13rem] md:gap-10">
+          <div className="min-w-0 space-y-7">
+            <section aria-labelledby={`${titleId}-overview`}>
+              <h3
+                id={`${titleId}-overview`}
+                className="mb-3 font-display text-xl font-semibold"
+              >
+                About the project
+              </h3>
+              <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+                {project.longDescription}
+              </p>
+            </section>
+
+            {project.features.length > 0 && (
+              <section aria-labelledby={`${titleId}-features`}>
+                <h3
+                  id={`${titleId}-features`}
+                  className="mb-4 font-display text-xl font-semibold"
                 >
-                  <span className="relative z-10">Visit site</span>
-                  <ExternalLink className="size-3.5 relative z-10" />
-                </a>
-              )}
-            </div>
-
-            {/* Long description */}
-            <p className="text-muted-foreground leading-relaxed text-[15px]">
-              {project.longDescription}
-            </p>
-
-            {/* Features */}
-            {project.features && project.features.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-                  Key Features
+                  Key features
                 </h3>
-                <ul className="space-y-2">
-                  {project.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm text-foreground">
-                      <span className="mt-0.5 shrink-0 size-5 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center">
-                        <CheckCircle2 className="size-3 text-brand" />
+                <ul className="space-y-3">
+                  {project.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-3 text-sm leading-relaxed"
+                    >
+                      <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand-dark">
+                        <Check aria-hidden="true" className="size-3" />
                       </span>
-                      {f}
+                      {feature}
                     </li>
                   ))}
                 </ul>
-              </div>
+              </section>
             )}
-
-            {/* Tech stack */}
-            {project.tech && project.tech.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-                  Tech Stack
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="bg-muted/60 border border-border text-foreground rounded-full px-3 py-1 text-xs font-medium hover:border-brand/30 hover:bg-brand/5 transition-colors"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Footer CTA */}
-            <div className="pt-2 border-t border-border flex items-center justify-between gap-4">
-              <p className="text-sm text-muted-foreground">
-                {hasLink ? 'This project is publicly accessible.' : 'This project is private or in development.'}
-              </p>
-              {hasLink ? (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary rounded-full h-9 px-5 flex items-center gap-2 text-sm font-medium shrink-0"
-                >
-                  <span className="relative z-10">Open project</span>
-                  <ExternalLink className="size-3.5 relative z-10" />
-                </a>
-              ) : (
-                <span className="text-sm font-medium text-muted-foreground px-4 py-2 rounded-full border border-border bg-muted/40">
-                  Coming soon
-                </span>
-              )}
-            </div>
           </div>
+
+          <aside
+            aria-label="Project metadata"
+            className="min-w-0 border-t border-border pt-6 md:border-l md:border-t-0 md:pl-6 md:pt-0"
+          >
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Project status
+            </h3>
+            <ProjectStatus project={project} />
+
+            {project.tech.length > 0 && (
+              <section aria-labelledby={`${titleId}-tech`} className="mt-7">
+                <h3
+                  id={`${titleId}-tech`}
+                  className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                >
+                  Built with
+                </h3>
+                <ul className="flex flex-wrap gap-2">
+                  {project.tech.map((technology) => (
+                    <li
+                      key={technology}
+                      className="rounded-lg border border-border bg-muted/60 px-2.5 py-1.5 text-xs font-medium"
+                    >
+                      {technology}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </aside>
         </div>
+
+        <footer className="mt-8 flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {link
+              ? "External link · opens in a new tab."
+              : "No public project link provided."}
+          </p>
+          {link && (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-dark px-5 py-3 text-sm font-semibold text-brand-foreground transition-colors hover:bg-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              {isPackage ? "View package" : "Open project link"}
+              <span className="sr-only"> (opens in a new tab)</span>
+              <ArrowUpRight aria-hidden="true" className="size-4" />
+            </a>
+          )}
+        </footer>
       </div>
-    </div>
+    </dialog>
   );
 }
