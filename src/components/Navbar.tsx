@@ -1,145 +1,199 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { profile } from "@/data";
+
+const navItems = [
+  { label: "About", id: "about" },
+  { label: "Work", id: "projects" },
+  { label: "Experience", id: "experience" },
+];
+const sectionIds = ["hero", ...navItems.map(({ id }) => id), "contact"];
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7446ed] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f7f7f2]";
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('hero');
-  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
-  const desktopNavRef = useRef<HTMLDivElement>(null);
-  const [indicator, setIndicator] = useState<{ left: number; width: number; show: boolean }>({
-    left: 0,
-    width: 0,
-    show: false,
-  });
+  const [activeSection, setActiveSection] = useState("hero");
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    let frame = 0;
+    const sections = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((section): section is HTMLElement => section !== null);
+
+    const update = () => {
+      frame = 0;
+      const scrollable =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress =
+        scrollable > 0
+          ? Math.min(1, Math.max(0, window.scrollY / scrollable))
+          : 0;
+      if (progressRef.current)
+        progressRef.current.style.transform = `scaleX(${progress})`;
+
+      const marker = Math.min(window.innerHeight * 0.3, 220);
+      let current = sections[0]?.id ?? "hero";
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= marker) current = section.id;
+      }
+      if (scrollable > 0 && window.scrollY >= scrollable - 2)
+        current = "contact";
+      setActiveSection((previous) =>
+        previous === current ? previous : current,
+      );
+    };
+    const scheduleUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    resizeObserver.observe(document.body);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+    };
   }, []);
 
   useEffect(() => {
-    const sections = ['hero', 'about', 'projects', 'experience', 'contact'];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-40% 0px -55% 0px' }
-    );
-    sections.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, []);
-
-  // Animate the active indicator pill behind desktop nav links
-  useLayoutEffect(() => {
-    const activeId = activeSection;
-    const link = linkRefs.current[activeId];
-    const nav = desktopNavRef.current;
-    if (link && nav) {
-      const navRect = nav.getBoundingClientRect();
-      const linkRect = link.getBoundingClientRect();
-      setIndicator({
-        left: linkRect.left - navRect.left,
-        width: linkRect.width,
-        show: true,
-      });
-    } else {
-      setIndicator((prev) => ({ ...prev, show: false }));
-    }
-  }, [activeSection]);
-
-  const navItems = [
-    { label: 'About', href: '#about', id: 'about' },
-    { label: 'Work', href: '#projects', id: 'projects' },
-    { label: 'Experience', href: '#experience', id: 'experience' },
-  ];
+    if (!mobileOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !headerRef.current?.contains(event.target)
+      ) {
+        setMobileOpen(false);
+      }
+    };
+    const desktop = window.matchMedia("(min-width: 768px)");
+    const onBreakpoint = () => {
+      if (desktop.matches) setMobileOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    desktop.addEventListener("change", onBreakpoint);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      desktop.removeEventListener("change", onBreakpoint);
+    };
+  }, [mobileOpen]);
 
   return (
-    <header className="fixed top-5 md:top-10 left-1/2 -translate-x-1/2 z-50">
+    <header
+      ref={headerRef}
+      className="fixed inset-x-0 top-0 z-50 border-b border-[#18191c]/10 bg-[#f7f7f2]/95 text-[#18191c] backdrop-blur-xl"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setMobileOpen(false);
+      }}
+    >
       <nav
-        className="rounded-full border border-border bg-background/80 backdrop-blur-xl px-1.5 md:px-2 py-1.5 md:py-2 flex items-center gap-0.5 md:gap-1 transition-all duration-300"
-        style={{
-          boxShadow: scrolled
-            ? '0 8px 32px -8px hsl(var(--brand) / 0.15), 0 2px 8px rgba(0,0,0,0.06)'
-            : '0 1px 3px rgba(0,0,0,0.03)',
-        }}
+        aria-label="Main navigation"
+        className="mx-auto flex h-20 max-w-[1280px] items-center justify-between gap-3 px-5 sm:px-8 lg:px-12"
       >
-        {/* Logo */}
         <a
           href="#hero"
-          className="size-8 md:size-9 rounded-full flex items-center justify-center font-display font-extrabold text-foreground hover:bg-muted hover:scale-110 transition-all duration-200"
-          style={{ letterSpacing: '-0.09em' }}
-          aria-label="Home"
+          aria-label={`${profile.name} — home`}
+          onClick={() => setMobileOpen(false)}
+          className={`group flex shrink-0 items-center gap-3 rounded-lg ${focusRing}`}
         >
-          EO
+          <span className="flex size-11 items-center justify-center rounded-[14px] bg-[#18191c] font-display text-xl font-extrabold tracking-[-0.12em] text-[#d7fa77] transition-colors group-hover:bg-[#7446ed] group-hover:text-white">
+            EO<span className="text-[#d7fa77]">.</span>
+          </span>
+          <span className="hidden font-display text-[17px] font-bold leading-[1.05] tracking-tight min-[380px]:block">
+            {profile.firstName}
+            <br />
+            {profile.lastName}
+            <span className="text-[#7446ed]">.</span>
+          </span>
         </a>
 
-        <div className="h-5 w-px bg-border mx-0.5" />
-
-        {/* Nav links - desktop */}
-        <div ref={desktopNavRef} className="hidden md:flex items-center gap-0.5 relative">
-          {indicator.show && (
-            <span
-              className="nav-indicator h-8 top-1/2 -translate-y-1/2"
-              style={{ left: indicator.left, width: indicator.width, opacity: 1 }}
-            />
-          )}
-          {navItems.map((item) => {
-            const isActive = activeSection === item.id;
-            return (
-              <a
-                key={item.label}
-                ref={(el) => {
-                  linkRefs.current[item.id] = el;
-                }}
-                href={item.href}
-                className={`nav-nudge relative z-10 rounded-full px-3 h-8 flex items-center text-sm font-medium transition-colors duration-200 ${
-                  isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {item.label}
-              </a>
-            );
-          })}
+        <div className="ml-auto hidden items-center gap-1 md:flex lg:gap-3">
+          {navItems.map(({ label, id }) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              aria-current={activeSection === id ? "location" : undefined}
+              className={`rounded-full px-4 py-3 text-sm font-medium transition-colors ${focusRing} ${activeSection === id ? "bg-[#18191c] text-[#f7f7f2]" : "text-[#18191c]/70 hover:bg-[#18191c]/5 hover:text-[#18191c]"}`}
+            >
+              {label}
+            </a>
+          ))}
         </div>
 
-        <div className="h-5 w-px bg-border mx-0.5 hidden md:block" />
-
-        {/* Nav links - mobile */}
-        <div className="flex md:hidden items-center gap-0.5">
-          {navItems.map((item) => {
-            const isActive = activeSection === item.id;
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                className={`nav-nudge rounded-full px-2 h-8 flex items-center text-xs font-medium transition-colors ${
-                  isActive ? 'text-foreground bg-muted' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {item.label}
-              </a>
-            );
-          })}
-        </div>
-
-        {/* Contact button */}
         <a
           href="#contact"
-          className={`btn-primary rounded-full px-3 md:px-4 h-8 md:h-9 flex items-center text-[13px] md:text-sm font-medium active:scale-[0.97] transition-all duration-200 ${
-            activeSection === 'contact' ? 'ring-2 ring-brand/30' : ''
-          }`}
-          style={{ transitionTimingFunction: 'var(--ease-out)' }}
+          aria-current={activeSection === "contact" ? "location" : undefined}
+          onClick={() => setMobileOpen(false)}
+          className={`ml-auto inline-flex min-h-11 items-center gap-2 rounded-full bg-[#7446ed] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#5e32cf] md:ml-4 sm:px-5 ${focusRing}`}
         >
-          <span className="relative z-10">Contact</span>
+          Let’s talk <ArrowUpRight aria-hidden="true" className="size-4" />
         </a>
+        <button
+          ref={toggleRef}
+          type="button"
+          aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setMobileOpen((open) => !open)}
+          className={`flex size-11 shrink-0 items-center justify-center rounded-full border border-[#18191c]/20 md:hidden ${focusRing}`}
+        >
+          {mobileOpen ? (
+            <X aria-hidden="true" className="size-5" />
+          ) : (
+            <Menu aria-hidden="true" className="size-5" />
+          )}
+        </button>
       </nav>
+
+      <nav
+        id="mobile-navigation"
+        aria-label="Mobile navigation"
+        hidden={!mobileOpen}
+        className="border-t border-[#18191c]/10 px-5 pb-6 pt-3 md:hidden"
+      >
+        {navItems.map(({ label, id }, index) => (
+          <a
+            key={id}
+            href={`#${id}`}
+            aria-current={activeSection === id ? "location" : undefined}
+            onClick={() => setMobileOpen(false)}
+            className={`my-1 flex min-h-14 items-center justify-between rounded-xl px-4 font-display text-2xl font-semibold ${focusRing} ${activeSection === id ? "bg-[#d7fa77]" : "hover:bg-[#18191c]/5"}`}
+          >
+            <span>
+              <span
+                aria-hidden="true"
+                className="mr-4 align-middle font-sans text-xs text-[#18191c]/60"
+              >
+                0{index + 1}
+              </span>
+              {label}
+            </span>
+            <ArrowUpRight aria-hidden="true" className="size-5" />
+          </a>
+        ))}
+      </nav>
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[2px]">
+        <div
+          ref={progressRef}
+          className="h-full origin-left bg-[#7446ed]"
+          style={{ transform: "scaleX(0)" }}
+        />
+      </div>
     </header>
   );
 }

@@ -1,50 +1,74 @@
-import { Code2, Server, Bot, Plug, Smartphone } from 'lucide-react';
-import { SplitText } from './SplitText';
-import { FadeUp } from './FadeUp';
-import { services } from '@/data';
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Code2,
-  Server,
+import {
+  ArrowUpRight,
   Bot,
+  Code2,
   Plug,
+  Server,
   Smartphone,
-};
+} from "lucide-react";
+import { FadeUp } from "./FadeUp";
+import { services } from "@/data";
+
+const icons = { Code2, Server, Bot, Plug, Smartphone };
 
 export function Services() {
   return (
-    <section className="py-24 md:py-32">
-      <div className="container mx-auto max-w-4xl px-4">
-        <p className="section-label">What I do</p>
-        <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-          <SplitText text="What I Offer" />
-        </h2>
-        <FadeUp delay={100}>
-          <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-            End-to-end backend solutions, APIs, and automation — built to scale.
-          </p>
+    <section
+      id="services"
+      className="capabilities-section"
+      aria-labelledby="services-heading"
+    >
+      <div className="studio-section">
+        <FadeUp>
+          <div className="section-kicker">
+            <span>03 / WHAT I BRING</span>
+            <span>FROM FIRST IDEA TO FINAL DEPLOY</span>
+          </div>
+          <div className="capabilities-intro">
+            <h2 id="services-heading" className="section-title">
+              Your vision.
+              <br />
+              <span>My execution.</span>
+            </h2>
+            <p>
+              Good software is more than a good-looking interface. It’s the
+              reliable system underneath, the thoughtful experience on top, and
+              everything in between.
+            </p>
+          </div>
         </FadeUp>
-
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="service-list">
           {services.map((service, i) => {
-            const Icon = iconMap[service.icon] ?? Code2;
+            const Icon = icons[service.icon as keyof typeof icons] ?? Code2;
             return (
-              <FadeUp key={service.title} delay={i * 80}>
-                <div className="card-premium border border-border rounded-2xl p-6 hover:bg-muted/50 group h-full">
-                  <div className="icon-gradient size-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                    <Icon className="size-6" />
-                  </div>
-                  <h3 className="text-base font-semibold mb-2 group-hover:text-foreground transition-colors">
-                    {service.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
+              <FadeUp key={service.title} delay={i * 45}>
+                <a href="#contact" className="service-line">
+                  <span className="service-number">/ 0{i + 1}</span>
+                  <Icon className="service-icon" size={27} aria-hidden="true" />
+                  <h3>{service.title}</h3>
+                  <p>{service.description}</p>
+                  <span className="service-arrow">
+                    <ArrowUpRight size={23} aria-hidden="true" />
+                  </span>
+                </a>
               </FadeUp>
             );
           })}
         </div>
+        <FadeUp>
+          <div className="process-strip">
+            <span className="process-label">HOW WE GET THERE</span>
+            {["Discover", "Architect", "Build", "Refine & ship"].map(
+              (step, i) => (
+                <span key={step}>
+                  <small>0{i + 1}</small>
+                  {step}
+                  <ArrowUpRight size={16} aria-hidden="true" />
+                </span>
+              ),
+            )}
+          </div>
+        </FadeUp>
       </div>
     </section>
   );

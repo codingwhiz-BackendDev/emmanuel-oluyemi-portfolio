@@ -1,92 +1,115 @@
-import { SplitText } from './SplitText';
-import { FadeUp } from './FadeUp';
-import { achievements } from '@/data';
-import { Trophy, Star, Rocket, Award, Users, Package } from 'lucide-react';
+import { Award, Package, Rocket, Trophy, Users } from "lucide-react";
+import { achievements } from "@/data";
+import { FadeUp } from "./FadeUp";
 
-const achievementIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  'Completed 20+ Projects': Package,
-  'Python Developer Certification': Award,
-  'Growing Online Community': Users,
-  'Published PyPI Package': Rocket,
+const achievementIcons: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
+  "Completed 20+ Projects": Package,
+  "Python Developer Certification": Award,
+  "Growing Online Community": Users,
+  "Published PyPI Package": Rocket,
 };
 
 export function Achievements() {
   return (
-    <section className="py-24 md:py-32">
-      <div className="container mx-auto max-w-4xl px-4">
-        <p className="section-label">Milestones</p>
-        <h2 className="text-3xl md:text-4xl font-display font-bold mb-12">
-          <SplitText text="My Success Story" />
-        </h2>
-
-        {/* General Achievements */}
-        <FadeUp>
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-            <Star className="size-5 text-brand" />
-            General Achievements
-          </h3>
-        </FadeUp>
-
-        <div className="grid md:grid-cols-2 gap-4 mb-12">
-          {achievements.general.map((item, i) => {
-            const Icon = achievementIcons[item.title] || Trophy;
-            return (
-              <FadeUp key={item.title} delay={i * 80}>
-                <div className="card-premium border border-border rounded-2xl p-6 hover:bg-muted/50 group h-full">
-                  <div className="icon-gradient size-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                    <Icon className="size-6" />
-                  </div>
-                  <h4 className="text-base font-semibold mb-2 group-hover:text-foreground transition-colors">
-                    {item.title}
-                  </h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {item.description}
-                  </p>
-                </div>
-              </FadeUp>
-            );
-          })}
+    <section
+      className="studio-section text-foreground"
+      aria-labelledby="achievements-title"
+    >
+      <FadeUp>
+        <div className="section-kicker">
+          <span>RECOGNITION</span>
+          <span>MILESTONES & ACHIEVEMENTS</span>
         </div>
+        <h2 id="achievements-title" className="section-title max-w-[850px]">
+          A little recognition.
+          <br />
+          <span className="text-brand">A lot of motivation.</span>
+        </h2>
+      </FadeUp>
 
-        {/* Hackathon Achievements */}
-        <FadeUp delay={100}>
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-            <Trophy className="size-5 text-brand" />
-            Hackathon Achievements
+      <div className="mt-12 md:mt-16">
+        <FadeUp>
+          <h3 className="mb-6 text-xs font-semibold uppercase tracking-[0.16em]">
+            Hackathon achievements
           </h3>
         </FadeUp>
-
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid items-start gap-10 md:grid-cols-12 md:gap-8">
           {achievements.hackathon.map((item, i) => (
-            <FadeUp key={item.title} delay={i * 100}>
-              <div className="card-premium border border-border rounded-2xl overflow-hidden hover:bg-muted/40 group transition-colors duration-300">
-                {/* Image */}
-                <div className="aspect-[3/2] bg-muted overflow-hidden relative">
+            <FadeUp
+              key={item.title}
+              delay={i * 100}
+              className={
+                i % 2 === 0 ? "md:col-span-7" : "md:col-span-5 md:mt-24"
+              }
+            >
+              <figure className="group">
+                <div className="relative overflow-hidden rounded-2xl bg-ink">
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                    decoding="async"
+                    className={`w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-105 ${i % 2 === 0 ? "aspect-[4/3]" : "aspect-square"}`}
                   />
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{
-                      background:
-                        'linear-gradient(to top, hsl(var(--brand) / 0.15), transparent 60%)',
-                    }}
-                  />
+                  <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-[#d7fa77] px-4 py-2 text-xs font-bold text-ink shadow-sm md:bottom-5 md:left-5">
+                    <Trophy className="size-4" aria-hidden="true" />
+                    Third place
+                  </span>
                 </div>
-                <div className="p-6">
-                  <h4 className="text-base font-semibold mb-2 group-hover:text-foreground transition-colors">
-                    {item.title}
-                  </h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                <figcaption className="mt-5 border-t border-foreground/20 pt-4">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h4 className="text-xl font-semibold tracking-tight md:text-2xl">
+                      {item.title}
+                    </h4>
+                    <span
+                      className="text-xs tabular-nums text-brand"
+                      aria-hidden="true"
+                    >
+                      0{i + 1}
+                    </span>
+                  </div>
+                  <p className="mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground">
                     {item.description}
                   </p>
-                </div>
-              </div>
+                </figcaption>
+              </figure>
             </FadeUp>
           ))}
         </div>
+      </div>
+
+      <div className="mt-16 grid gap-6 border-t border-foreground/20 pt-8 md:mt-20 md:grid-cols-[1fr_2fr] md:gap-16">
+        <FadeUp>
+          <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">
+            General
+            <br className="hidden md:block" /> achievements
+          </h3>
+        </FadeUp>
+        <ul className="divide-y divide-foreground/15">
+          {achievements.general.map((item, i) => {
+            const Icon = achievementIcons[item.title] || Trophy;
+            return (
+              <li key={item.title} className="py-5 first:pt-0 last:pb-0">
+                <FadeUp delay={i * 60} className="flex items-start gap-4">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h4 className="text-base font-semibold tracking-tight">
+                      {item.title}
+                    </h4>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
+                </FadeUp>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </section>
   );

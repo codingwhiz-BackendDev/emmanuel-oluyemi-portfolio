@@ -1,38 +1,68 @@
-import { Atmosphere } from '@/components/Atmosphere';
-import { Navbar } from '@/components/Navbar';
-import { Hero } from '@/components/Hero';
-import { About } from '@/components/About';
-import { Services } from '@/components/Services';
-import { Achievements } from '@/components/Achievements';
-import { Projects } from '@/components/Projects';
-import { Experience } from '@/components/Experience';
-import { Contact } from '@/components/Contact';
-import { Footer } from '@/components/Footer';
+import { useState } from "react";
+import { Pause, Play } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Hero } from "@/components/Hero";
+import { About } from "@/components/About";
+import { Services } from "@/components/Services";
+import { Achievements } from "@/components/Achievements";
+import { Projects } from "@/components/Projects";
+import { Experience } from "@/components/Experience";
+import { Contact } from "@/components/Contact";
+import { Footer } from "@/components/Footer";
 
 function App() {
+  const [motionPaused, setMotionPaused] = useState(false);
+
   return (
-    <>
-      <Atmosphere />
+    <div className={motionPaused ? "portfolio motion-paused" : "portfolio"}>
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <Navbar />
-      <main className="min-h-screen overflow-x-hidden w-full">
-        <div className="lg:border-x border-border max-w-[1100px] mx-auto">
-          <Hero />
-          <About />
-          <Services />
-          <Achievements />
-          <Projects />
-          <Experience />
+      <main id="main-content" tabIndex={-1}>
+        <Hero />
+        <div
+          className="discipline-band"
+          aria-label="Web development, backend engineering, mobile experiences, and creative problem solving"
+        >
+          <div className="discipline-track" aria-hidden="true">
+            {[0, 1].map((copy) => (
+              <div key={copy}>
+                <span>WEB DEVELOPMENT</span>
+                <b>✳</b>
+                <span>BACKEND ENGINEERING</span>
+                <b>✳</b>
+                <span>MOBILE EXPERIENCES</span>
+                <b>✳</b>
+                <span>CREATIVE PROBLEM SOLVING</span>
+                <b>✳</b>
+              </div>
+            ))}
+          </div>
         </div>
-
-        {/* Dark contact panel outside bordered column */}
+        <About />
+        <Projects />
+        <Services />
+        <Achievements />
+        <Experience />
         <Contact />
-
-        {/* Footer back inside bordered column */}
-        <div className="lg:border-x border-border max-w-[1100px] mx-auto">
-          <Footer />
-        </div>
       </main>
-    </>
+      <Footer />
+      <button
+        type="button"
+        onClick={() => setMotionPaused((paused) => !paused)}
+        aria-pressed={motionPaused}
+        aria-label="Pause decorative animations"
+        className="motion-control"
+      >
+        {motionPaused ? (
+          <Play size={13} aria-hidden="true" />
+        ) : (
+          <Pause size={13} aria-hidden="true" />
+        )}
+        <span>{motionPaused ? "Motion paused" : "Pause motion"}</span>
+      </button>
+    </div>
   );
 }
 

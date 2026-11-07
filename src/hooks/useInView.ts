@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export function useInView<T extends HTMLElement = HTMLDivElement>(
-  options?: IntersectionObserverInit
+  options?: IntersectionObserverInit,
 ) {
   const ref = useRef<T>(null);
   const [inView, setInView] = useState(false);
@@ -9,6 +9,10 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (!("IntersectionObserver" in window)) {
+      setInView(true);
+      return;
+    }
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -16,7 +20,7 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px', ...options }
+      { threshold: 0.1, rootMargin: "0px 0px -50px 0px", ...options },
     );
     observer.observe(el);
     return () => observer.disconnect();

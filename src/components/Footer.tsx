@@ -1,67 +1,79 @@
-import { Github, Linkedin, Mail } from 'lucide-react';
-import { SplitText } from './SplitText';
-import { profile } from '@/data';
+import { ArrowUp, ArrowUpRight, Github, Linkedin, Mail } from "lucide-react";
+import { profile } from "@/data";
 
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="currentColor">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-    </svg>
-  );
-}
+const socialLinks = [
+  { label: "GitHub", href: profile.socials.github, icon: Github },
+  { label: "LinkedIn", href: profile.socials.linkedin, icon: Linkedin },
+  { label: "X / Twitter", href: profile.socials.x, icon: ArrowUpRight },
+  { label: "Email", href: profile.socials.email, icon: Mail },
+];
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7446ed] focus-visible:ring-offset-4 focus-visible:ring-offset-[#f7f7f2]";
 
 export function Footer() {
-  const socialLinks = [
-    { icon: Github, href: profile.socials.github, label: 'GitHub' },
-    { icon: Linkedin, href: profile.socials.linkedin, label: 'LinkedIn' },
-    { icon: XIcon, href: profile.socials.x, label: 'X' },
-    { icon: Mail, href: profile.socials.email, label: 'Email' },
-  ];
-
   return (
-    <footer className="py-10 md:py-12 border-t border-border">
-      <div className="container mx-auto max-w-[1100px] px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          {/* Left: monogram + copyright */}
-          <div className="flex items-center gap-3">
+    <footer className="bg-[#f7f7f2] px-6 pb-7 pt-8 text-[#18191c] sm:px-10 lg:px-12">
+      <div className="mx-auto max-w-[1280px]">
+        <div className="flex flex-col items-start justify-between gap-7 pb-8 sm:flex-row sm:items-center">
+          <a
+            href="#hero"
+            aria-label={`${profile.name} — back to home`}
+            className={`group flex items-center gap-3 rounded-lg ${focusRing}`}
+          >
             <span
-              className="font-display font-extrabold text-foreground"
-              style={{ letterSpacing: '-0.09em' }}
+              aria-hidden="true"
+              className="flex size-11 items-center justify-center rounded-[14px] border border-[#18191c]/20 font-display text-xl font-extrabold tracking-[-0.12em] transition-colors group-hover:border-[#7446ed] group-hover:bg-[#7446ed] group-hover:text-white"
             >
-              EO
+              EO.
             </span>
-            <span className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} {profile.name}. Built from Nigeria.
+            <span>
+              <span className="block font-display text-lg font-bold tracking-tight">
+                {profile.name}
+                <span className="text-[#7446ed]">.</span>
+              </span>
+              <span className="mt-0.5 block text-xs text-[#18191c]/60">
+                Thoughtfully built. Ready for what’s next.
+              </span>
             </span>
-          </div>
+          </a>
+          <a
+            href="#hero"
+            className={`group inline-flex min-h-11 items-center gap-3 rounded-full border border-[#18191c]/20 py-2 pl-5 pr-2 text-sm font-medium transition-colors hover:border-[#7446ed] hover:text-[#7446ed] ${focusRing}`}
+          >
+            Back to top
+            <span className="flex size-8 items-center justify-center rounded-full bg-[#18191c] text-[#d7fa77] transition-colors group-hover:bg-[#7446ed]">
+              <ArrowUp aria-hidden="true" className="size-4" />
+            </span>
+          </a>
+        </div>
 
-          {/* Right: social icons */}
-          <div className="flex items-center gap-2">
-            {socialLinks.map((link) => {
-              const Icon = link.icon;
+        <div className="flex flex-col-reverse justify-between gap-5 border-t border-[#18191c]/15 pt-5 md:flex-row md:items-center">
+          <p className="text-xs leading-relaxed text-[#18191c]/60">
+            © {new Date().getFullYear()} {profile.name}. Built from Nigeria.
+          </p>
+          <nav
+            aria-label="Footer social links"
+            className="flex flex-wrap items-center gap-x-5 gap-y-1"
+          >
+            {socialLinks.map(({ label, href, icon: Icon }) => {
+              const external = !href.startsWith("mailto:");
               return (
                 <a
-                  key={link.label}
-                  href={link.href}
-                  target={link.href.startsWith('mailto:') ? undefined : '_blank'}
-                  rel="noopener noreferrer"
-                  aria-label={link.label}
-                  className="hover-fine size-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-brand-foreground hover:bg-brand-gradient hover:scale-110 hover:shadow-lg hover:shadow-brand/30 transition-all duration-200"
+                  key={label}
+                  href={href}
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener noreferrer" : undefined}
+                  aria-label={
+                    external ? `${label} (opens in a new tab)` : label
+                  }
+                  className={`inline-flex min-h-11 items-center gap-1.5 rounded-md text-xs font-medium transition-colors hover:text-[#7446ed] ${focusRing}`}
                 >
-                  <Icon className="size-4" />
+                  <Icon aria-hidden="true" className="size-3.5" />
+                  {label}
                 </a>
               );
             })}
-          </div>
-        </div>
-
-        {/* Tagline */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-accent text-base text-foreground">
-              <SplitText text="Let's build something great together" charDelay={15} />
-            </span>
-          </p>
+          </nav>
         </div>
       </div>
     </footer>
