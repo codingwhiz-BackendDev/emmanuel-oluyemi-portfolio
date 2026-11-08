@@ -10,6 +10,7 @@ import { Experience } from "@/components/Experience";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { Entrance } from "@/components/Entrance";
+import { ShipIt } from "@/components/ShipIt";
 
 function App() {
   const [motionPaused, setMotionPaused] = useState(false);
@@ -100,6 +101,7 @@ function App() {
           </section>
           <About />
           <Projects />
+          <ShipIt motionPaused={motionPaused} />
           <Services />
           <Achievements />
           <Experience />
