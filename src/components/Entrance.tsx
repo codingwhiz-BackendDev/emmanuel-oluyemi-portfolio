@@ -1,43 +1,61 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
+  ArrowRight,
   ArrowUpRight,
   Bot,
   Braces,
   Code2,
-  Command,
+  Database,
+  Layers,
+  Play,
   Smartphone,
+  Sparkles,
   Volume2,
   VolumeX,
 } from "lucide-react";
 import { profile } from "@/data";
+import { INTRO_TIMING } from "@/introTimeline";
 import { useIntroSound } from "@/hooks/useIntroSound";
 import "./Entrance.css";
 
-const REVEAL_AT = 4550;
-const FINISH_AT = 5600;
-const CHAPTERS = ["THE HUMAN", "THE CRAFT", "THE POSSIBILITIES"];
-
+type Phase = "portrait" | "craft" | "mobile" | "ai" | "impact" | "reveal";
 interface EntranceProps {
   onReveal: () => void;
   onComplete: () => void;
 }
 
+function phaseAt(elapsed: number): Phase {
+  if (elapsed >= INTRO_TIMING.reveal) return "reveal";
+  if (elapsed >= INTRO_TIMING.impact) return "impact";
+  if (elapsed >= INTRO_TIMING.ai) return "ai";
+  if (elapsed >= INTRO_TIMING.mobile) return "mobile";
+  if (elapsed >= INTRO_TIMING.craft) return "craft";
+  return "portrait";
+}
+
 export function Entrance({ onReveal, onComplete }: EntranceProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
+  const progressRef = useRef<HTMLSpanElement>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
+  const aliveRef = useRef(false);
   const finishedRef = useRef(false);
-  const timelineStartRef = useRef<number | null>(null);
+  const startingRef = useRef(false);
+  const startedAtRef = useRef<number | null>(null);
+  const phaseRef = useRef<Phase>("portrait");
+  const revealSentRef = useRef(false);
+  const [playing, setPlaying] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<Phase>("portrait");
+  const [imageFailed, setImageFailed] = useState(false);
   const {
     soundEnabled,
     soundStatus,
-    toggleSound,
+    enableSound,
+    muteSound,
     startSoundtrack,
     stopSoundtrack,
   } = useIntroSound();
-  const [chapter, setChapter] = useState(0);
-  const [ready, setReady] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
-  const [revealing, setRevealing] = useState(false);
 
   const complete = useCallback(() => {
     if (finishedRef.current) return;
@@ -48,7 +66,11 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
   }, [onComplete, stopSoundtrack]);
 
   useLayoutEffect(() => {
-    finishedRef.current = false;
+    aliveRef.current = true;
+    if (finishedRef.current)
+      return () => {
+        aliveRef.current = false;
+      };
     const dialog = dialogRef.current;
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (
@@ -57,9 +79,10 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
       preference.matches
     ) {
       complete();
-      return;
+      return () => {
+        aliveRef.current = false;
+      };
     }
-
     const body = document.body;
     const overflow = body.style.overflow;
     const paddingRight = body.style.paddingRight;
@@ -71,61 +94,104 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
     body.style.overflow = "hidden";
     if (scrollbarWidth > 0)
       body.style.paddingRight = `${bodyPadding + scrollbarWidth}px`;
-
-    let started = false;
-    let revealTimer: number | undefined;
-    let finishTimer: number | undefined;
-    const chapterTimers: number[] = [];
-    const start = () => {
-      if (started || finishedRef.current) return;
-      started = true;
-      timelineStartRef.current = performance.now();
-      startSoundtrack();
-      setReady(true);
-      chapterTimers.push(window.setTimeout(() => setChapter(1), 900));
-      chapterTimers.push(window.setTimeout(() => setChapter(2), 3000));
-      revealTimer = window.setTimeout(() => {
-        setRevealing(true);
-        onReveal();
-      }, REVEAL_AT);
-      finishTimer = window.setTimeout(complete, FINISH_AT);
-    };
-    const image = imageRef.current;
-    image?.addEventListener("load", start);
-    image?.addEventListener("error", start);
-    if (image?.complete) start();
-    // Let the portrait arrive first, but never trap visitors on a slow connection.
-    const imageDeadline = window.setTimeout(start, 1500);
-    const handlePreference = () => {
+    const onPreference = () => {
       if (preference.matches) complete();
     };
-    const handleVisibility = () => {
+    const onVisibility = () => {
       if (document.hidden) complete();
     };
-    preference.addEventListener("change", handlePreference);
-    document.addEventListener("visibilitychange", handleVisibility);
-
+    preference.addEventListener("change", onPreference);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
-      window.clearTimeout(imageDeadline);
-      window.clearTimeout(revealTimer);
-      window.clearTimeout(finishTimer);
-      chapterTimers.forEach(window.clearTimeout);
-      timelineStartRef.current = null;
+      aliveRef.current = false;
       stopSoundtrack();
-      image?.removeEventListener("load", start);
-      image?.removeEventListener("error", start);
-      preference.removeEventListener("change", handlePreference);
-      document.removeEventListener("visibilitychange", handleVisibility);
+      preference.removeEventListener("change", onPreference);
+      document.removeEventListener("visibilitychange", onVisibility);
       if (dialog.open) dialog.close();
       body.style.overflow = overflow;
       body.style.paddingRight = paddingRight;
     };
-  }, [complete, onReveal, startSoundtrack, stopSoundtrack]);
+  }, [complete, stopSoundtrack]);
+
+  useLayoutEffect(() => {
+    if (!playing || startedAtRef.current === null) return;
+    skipRef.current?.focus({ preventScroll: true });
+    let frame = 0;
+    const update = () => {
+      if (finishedRef.current || startedAtRef.current === null) return;
+      const elapsed = performance.now() - startedAtRef.current;
+      const next = phaseAt(elapsed);
+      if (next !== phaseRef.current) {
+        phaseRef.current = next;
+        setPhase(next);
+      }
+      if (progressRef.current)
+        progressRef.current.style.transform = `scaleX(${Math.min(1, elapsed / INTRO_TIMING.finish)})`;
+      if (timeRef.current)
+        timeRef.current.textContent = `00:${(elapsed / 1000).toFixed(1).padStart(4, "0")}`;
+      if (elapsed >= INTRO_TIMING.reveal && !revealSentRef.current) {
+        revealSentRef.current = true;
+        onReveal();
+      }
+      if (elapsed >= INTRO_TIMING.finish) {
+        complete();
+        return;
+      }
+      frame = requestAnimationFrame(update);
+    };
+    frame = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frame);
+  }, [playing, complete, onReveal]);
+
+  const begin = async (withSound: boolean) => {
+    if (
+      startingRef.current ||
+      startedAtRef.current !== null ||
+      finishedRef.current
+    )
+      return;
+    startingRef.current = true;
+    setBusy(true);
+    if (withSound) {
+      const unlocked = await enableSound();
+      if (!aliveRef.current || finishedRef.current) return;
+      if (!unlocked) {
+        startingRef.current = false;
+        setBusy(false);
+        return;
+      }
+    } else {
+      muteSound();
+    }
+    if (!aliveRef.current || finishedRef.current) return;
+    startedAtRef.current = performance.now();
+    if (withSound) startSoundtrack();
+    setPlaying(true);
+    setBusy(false);
+  };
+
+  const changeSound = async () => {
+    if (busy || finishedRef.current) return;
+    if (soundEnabled) {
+      muteSound();
+      return;
+    }
+    setBusy(true);
+    const unlocked = await enableSound();
+    if (!aliveRef.current || finishedRef.current) return;
+    if (unlocked && startedAtRef.current !== null)
+      startSoundtrack((performance.now() - startedAtRef.current) / 1000);
+    setBusy(false);
+  };
+
+  const craftIndex = phase === "mobile" ? 1 : phase === "ai" ? 2 : 0;
+  const craftVisible = playing && ["craft", "mobile", "ai"].includes(phase);
+  const impactVisible = phase === "impact" || phase === "reveal";
 
   return (
     <dialog
       ref={dialogRef}
-      className={`entrance entrance-phase-${chapter}${ready ? " entrance-ready" : ""}${revealing ? " entrance-revealing" : ""}${soundEnabled ? " entrance-sound-on" : ""}`}
+      className={`entrance-film ${playing ? "is-playing" : "is-gate"} phase-${phase}${soundEnabled ? " has-sound" : ""}`}
       aria-labelledby="entrance-title"
       aria-describedby="entrance-description"
       onCancel={(event) => {
@@ -133,267 +199,361 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
         complete();
       }}
     >
-      <div
-        className="entrance-curtain entrance-curtain-lime"
-        aria-hidden="true"
-      />
-      <div
-        className="entrance-curtain entrance-curtain-violet"
-        aria-hidden="true"
-      />
-      <div className="entrance-stage">
-        <div className="entrance-grid" aria-hidden="true" />
-        <div className="entrance-vignette" aria-hidden="true" />
-        <div className="entrance-film-grain" aria-hidden="true" />
-        <header className="entrance-header">
-          <span className="entrance-brand" aria-hidden="true">
-            EO<span>.</span>
-          </span>
-          <span className="entrance-edition" aria-hidden="true">
-            AN EMMANUEL OLUYEMI ORIGINAL / VOL. 01
-          </span>
-          <div className="entrance-controls">
+      <div className="film-curtain film-curtain-lime" aria-hidden="true" />
+      <div className="film-curtain film-curtain-violet" aria-hidden="true" />
+      <header className="film-header">
+        <span className="film-brand" aria-hidden="true">
+          EO<span>✳</span>
+        </span>
+        <span className="film-edition" aria-hidden="true">
+          THE BUILDER’S CUT <i /> VOL. 01 / {new Date().getFullYear()}
+        </span>
+        <div className="film-controls">
+          {playing && (
             <button
               type="button"
-              className="entrance-sound"
+              className="film-sound"
+              aria-label="Intro sound"
               aria-pressed={soundEnabled}
-              aria-label="Enable intro sound"
-              aria-describedby="entrance-audio-status"
-              onClick={() => {
-                const elapsed =
-                  timelineStartRef.current === null
-                    ? 0
-                    : (performance.now() - timelineStartRef.current) / 1000;
-                void toggleSound(elapsed);
-              }}
+              aria-describedby="film-audio-status"
+              disabled={busy}
+              onClick={() => void changeSound()}
             >
               {soundEnabled ? (
-                <Volume2 size={15} aria-hidden="true" />
+                <Volume2 size={16} aria-hidden="true" />
               ) : (
-                <VolumeX size={15} aria-hidden="true" />
+                <VolumeX size={16} aria-hidden="true" />
               )}
-              <span>{soundEnabled ? "Sound on" : "Tap for sound"}</span>
-              <span className="entrance-sound-bars" aria-hidden="true">
+              <span>
+                {busy ? "Connecting…" : soundEnabled ? "Sound on" : "Sound off"}
+              </span>
+              <span className="film-equalizer" aria-hidden="true">
                 <i />
                 <i />
                 <i />
                 <i />
               </span>
             </button>
-            <button type="button" onClick={complete} className="entrance-skip">
-              Skip intro{" "}
-              <span className="entrance-escape-key" aria-hidden="true">
-                ESC
-              </span>
-            </button>
-          </div>
-        </header>
-
-        <p id="entrance-audio-status" className="sr-only" role="status">
-          {soundStatus}
-        </p>
-        <p id="entrance-description" className="sr-only">
-          Meet {profile.name}. I build backend systems with Python and Django,
-          mobile apps with Flutter, AI-powered products, and web experiences
-          with React.
-        </p>
-        <div className="entrance-scene">
-          <div className="entrance-frame" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
-          <div className="entrance-scene-label" aria-hidden="true">
-            <span className="entrance-record-dot" /> PERSONAL SHOWREEL{" "}
-            <span>01:EO</span>
-          </div>
-          <div className="entrance-backtype" aria-hidden="true">
-            <span>THE MIND.</span>
-            <span>THE MAKER.</span>
-          </div>
-          <div className="entrance-halo" aria-hidden="true" />
-          <svg
-            className="entrance-connections"
-            viewBox="0 0 1000 560"
-            preserveAspectRatio="none"
-            aria-hidden="true"
+          )}
+          <button
+            ref={skipRef}
+            type="button"
+            className="film-skip"
+            onClick={complete}
           >
-            <path d="M220 150 C340 150 320 240 470 260 M780 155 C650 155 690 250 530 270 M260 430 C370 430 350 320 470 300 M760 420 C650 420 660 330 530 300" />
-          </svg>
-
-          <div className="entrance-portrait-anchor">
-            <div
-              className={`entrance-portrait${imageFailed ? " entrance-image-failed" : ""}`}
+            Skip intro <ArrowUpRight size={15} aria-hidden="true" />
+          </button>
+        </div>
+      </header>
+      <div className="film-stage">
+        <div className="film-atmosphere" aria-hidden="true" />
+        <div className="film-grain" aria-hidden="true" />
+        <p id="entrance-description" className="sr-only">
+          Meet {profile.name}. A 6.8-second portrait-led introduction to backend
+          engineering, web development, Flutter mobile apps, and AI products.
+          Choose sound or silent playback, or skip to the portfolio.
+        </p>
+        <div className="film-canvas">
+          {!playing && (
+            <section
+              className="film-welcome"
+              aria-label="Choose how to watch the introduction"
             >
-              <div className="entrance-photo">
-                <span className="entrance-photo-fallback" aria-hidden="true">
-                  EO.
+              <p className="film-kicker">
+                <span /> A SHORT FILM ABOUT A CURIOUS MIND
+              </p>
+              <h3>
+                Meet the mind.
+                <br />
+                <span>Feel the craft.</span>
+              </h3>
+              <p className="film-welcome-copy">
+                A face. A few wild ideas.
+                <br />
+                And the things I bring to life.
+              </p>
+              <button
+                type="button"
+                className="film-enter"
+                disabled={busy}
+                onClick={() => void begin(true)}
+                aria-describedby="film-audio-status"
+              >
+                <span className="film-play-icon">
+                  <Play size={17} fill="currentColor" aria-hidden="true" />
                 </span>
-                <img
-                  ref={imageRef}
-                  src="/images/hero.jpg"
-                  alt={profile.name}
-                  width={960}
-                  height={1280}
-                  fetchPriority="high"
-                  onError={() => setImageFailed(true)}
-                />
-                <span className="entrance-photo-corner" aria-hidden="true">
-                  <Command size={17} /> BUILT DIFFERENT.
+                <span>
+                  {busy ? "Preparing sound…" : "Enter with sound"}
+                  <small>THE FULL EXPERIENCE</small>
                 </span>
-              </div>
-              <div className="entrance-photo-caption">
-                <span>THE HUMAN BEHIND IT ALL</span>
+                <ArrowUpRight size={20} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className="film-enter-silent"
+                disabled={busy}
+                onClick={() => void begin(false)}
+              >
+                <VolumeX size={13} aria-hidden="true" /> Enter silently{" "}
+                <ArrowRight size={13} aria-hidden="true" />
+              </button>
+              <p className="film-duration">
+                00:06.8 <span /> ORIGINAL AUDIO <span /> SKIP ANYTIME
+              </p>
+            </section>
+          )}
+
+          <div className="film-name-wall" aria-hidden="true">
+            <span>{profile.firstName}</span>
+            <span>{profile.lastName}</span>
+          </div>
+          <div className="film-orbit film-orbit-outer" aria-hidden="true" />
+          <div className="film-orbit film-orbit-inner" aria-hidden="true" />
+          <div className="film-photo-position">
+            <div
+              className="film-photo-echo film-photo-echo-one"
+              aria-hidden="true"
+            />
+            <div
+              className="film-photo-echo film-photo-echo-two"
+              aria-hidden="true"
+            />
+            <div
+              className={`film-photo${imageFailed ? " photo-unavailable" : ""}`}
+            >
+              <span className="film-photo-fallback" aria-hidden="true">
+                EO.
+              </span>
+              <img
+                src="/images/hero.jpg"
+                alt={profile.name}
+                width={960}
+                height={1280}
+                fetchPriority="high"
+                onError={() => setImageFailed(true)}
+              />
+              <span className="film-photo-index" aria-hidden="true">
+                FRAME 001 / THE HUMAN
+              </span>
+              <div className="film-photo-caption">
+                <span>NOT AN AVATAR. A BUILDER.</span>
                 <h2 id="entrance-title">
                   {profile.firstName}
                   <br />
                   {profile.lastName}
-                  <span>.</span>
+                  <b>.</b>
                 </h2>
-                <ArrowUpRight size={28} aria-hidden="true" />
+                <ArrowUpRight size={26} aria-hidden="true" />
               </div>
             </div>
-            <span className="entrance-photo-note" aria-hidden="true">
-              yep, that’s me ↗
+            <span className="film-photo-note" aria-hidden="true">
+              the face behind the ideas ↙
             </span>
-            <span className="entrance-maker-stamp" aria-hidden="true">
+            <span className="film-photo-stamp" aria-hidden="true">
               ✳
             </span>
           </div>
 
-          <div className="entrance-skill entrance-backend" aria-hidden="true">
-            <div className="entrance-card-top">
-              <span className="entrance-window-dots">
-                <i />
-                <i />
-                <i />
-              </span>
-              <span>01 / UNDER THE HOOD</span>
-              <Braces size={15} />
+          {playing && (
+            <div className="film-shot-label" aria-hidden="true">
+              <span className="film-record-dot" />{" "}
+              {impactVisible
+                ? "03 / THE IMPACT"
+                : craftVisible
+                  ? "02 / THE CRAFT"
+                  : "01 / THE HUMAN"}
+              <span>EMMANUEL OLUYEMI</span>
             </div>
-            <div className="entrance-card-title">
-              <Code2 size={20} />
-              <strong>Backend systems.</strong>
-            </div>
-            <div className="entrance-code">
-              <span>
-                def <b>build_something_great</b>():
-              </span>
-              <span>
-                {" "}
-                return <em>idea</em> + <em>execution</em>
-              </span>
-            </div>
-            <div className="entrance-card-tags">
-              <span>PYTHON</span>
-              <span>DJANGO</span>
-              <span>APIs</span>
-            </div>
-          </div>
-
-          <div className="entrance-skill entrance-mobile" aria-hidden="true">
-            <div className="entrance-phone">
-              <span className="entrance-phone-notch" />
-              <Smartphone size={23} />
-              <div className="entrance-phone-tiles">
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-              <span className="entrance-phone-home" />
-            </div>
-            <div>
-              <span className="entrance-card-index">02 / IN YOUR POCKET</span>
-              <strong>
-                Mobile
+          )}
+          <div
+            className={`film-craft-deck${craftVisible ? " is-visible" : ""}`}
+            aria-hidden="true"
+          >
+            <article
+              className={`film-craft-shot ${craftIndex === 0 ? "is-active" : ""}`}
+            >
+              <p className="film-kicker">01 / LOGIC WITH PURPOSE</p>
+              <h3>
+                I engineer
                 <br />
-                magic.
-              </strong>
-              <span className="entrance-mobile-stack">DART + FLUTTER</span>
-            </div>
+                <span>the backbone.</span>
+              </h3>
+              <p>
+                Backend systems. APIs. Web experiences.
+                <br />
+                The invisible work that makes everything work.
+              </p>
+              <div className="film-system">
+                <span>
+                  <Code2 size={22} />
+                  IDEA
+                </span>
+                <i />
+                <span>
+                  <Database size={22} />
+                  ENGINE
+                </span>
+                <i />
+                <span>
+                  <Layers size={22} />
+                  PRODUCT
+                </span>
+              </div>
+              <div className="film-code-line">
+                <Braces size={16} />
+                <code>Python + Django + React</code>
+                <span>→ BUILT TO SCALE</span>
+              </div>
+            </article>
+            <article
+              className={`film-craft-shot film-craft-mobile ${craftIndex === 1 ? "is-active" : ""}`}
+            >
+              <p className="film-kicker">
+                02 / SMALL SCREEN. BIG POSSIBILITIES.
+              </p>
+              <h3>
+                I make
+                <br />
+                <span>ideas move.</span>
+              </h3>
+              <p>
+                Cross-platform mobile experiences.
+                <br />
+                Built with Flutter. Made for actual people.
+              </p>
+              <div className="film-mobile-demo">
+                <div className="film-mini-phone">
+                  <i />
+                  <Smartphone size={24} />
+                  <div>
+                    <b />
+                    <b />
+                    <b />
+                    <b />
+                  </div>
+                  <small />
+                </div>
+                <div className="film-mobile-label">
+                  <span>DART × FLUTTER</span>
+                  <strong>
+                    One idea.
+                    <br />
+                    Every screen.
+                  </strong>
+                  <ArrowUpRight size={22} />
+                </div>
+              </div>
+            </article>
+            <article
+              className={`film-craft-shot film-craft-ai ${craftIndex === 2 ? "is-active" : ""}`}
+            >
+              <p className="film-kicker">03 / INTELLIGENCE, APPLIED.</p>
+              <h3>
+                I turn AI into
+                <br />
+                <span>actual impact.</span>
+              </h3>
+              <p>
+                Useful intelligence. Thoughtful automation.
+                <br />
+                Real products that solve real problems.
+              </p>
+              <div className="film-ai-demo">
+                <span>
+                  <Bot size={30} />
+                </span>
+                <i />
+                <span>
+                  <Sparkles size={35} />
+                </span>
+                <i />
+                <span>
+                  <Layers size={28} />
+                </span>
+              </div>
+              <div className="film-code-line">
+                <span>CLASSMILLIA</span>
+                <span>DJANGOPILOT</span>
+                <span>SELLARIS AI</span>
+              </div>
+            </article>
           </div>
 
-          <div className="entrance-skill entrance-web" aria-hidden="true">
-            <div className="entrance-card-top">
-              <span className="entrance-window-dots">
-                <i />
-                <i />
-                <i />
-              </span>
-              <span>03 / ON THE WEB</span>
-              <ArrowUpRight size={14} />
-            </div>
-            <div className="entrance-web-body">
+          <div
+            className={`film-impact${impactVisible ? " is-visible" : ""}`}
+            aria-hidden="true"
+          >
+            <div className="film-project film-project-one">
               <img
                 src="/images/portfolio/classmillia.jpg"
                 alt=""
-                width={160}
-                height={100}
-                decoding="async"
+                width={320}
+                height={200}
               />
-              <div>
-                <strong>
-                  Ideas you
-                  <br />
-                  can click.
-                </strong>
-                <span>REACT · FULL STACK</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="entrance-skill entrance-ai" aria-hidden="true">
-            <span className="entrance-ai-icon">
-              <Bot size={27} />
-            </span>
-            <div>
-              <span className="entrance-card-index">
-                04 / A LITTLE INTELLIGENCE
-              </span>
-              <strong>AI. Actual impact.</strong>
-              <span className="entrance-ai-detail">
-                SMARTER PRODUCTS. REAL PROBLEMS.
+              <span>
+                CLASSMILLIA <ArrowUpRight size={12} />
               </span>
             </div>
-            <span className="entrance-ai-spark">✳</span>
+            <div className="film-project film-project-two">
+              <img
+                src="/images/portfolio/campally.jpg"
+                alt=""
+                width={320}
+                height={200}
+              />
+              <span>
+                CAMPYALLY <ArrowUpRight size={12} />
+              </span>
+            </div>
+            <div className="film-impact-title">
+              <span>LESS TALK. MORE BUILD.</span>
+              <h3>
+                Let’s build
+                <br />
+                <em>what’s next.</em>
+                <b>↗</b>
+              </h3>
+            </div>
           </div>
         </div>
 
-        <footer className="entrance-footer">
-          <div className="entrance-chapters" aria-hidden="true">
-            {CHAPTERS.map((label, index) => (
-              <span
-                key={label}
-                className={chapter === index ? "is-active" : ""}
-              >
-                <b>0{index + 1}</b>
-                {label}
-                <i />
-              </span>
-            ))}
+        <footer className="film-footer">
+          <p
+            id="film-audio-status"
+            className={`film-audio-status${!playing ? " on-gate" : ""}`}
+            role="status"
+            aria-live="polite"
+          >
+            {soundStatus}
+          </p>
+          <div className="film-footer-meta" aria-hidden="true">
+            <span>MADE OF CURIOSITY. DRIVEN BY CRAFT.</span>
+            {playing ? (
+              <>
+                <div className="film-chapters">
+                  <span className={phase === "portrait" ? "active" : ""}>
+                    THE HUMAN
+                  </span>
+                  <i />
+                  <span className={craftVisible ? "active" : ""}>
+                    THE CRAFT
+                  </span>
+                  <i />
+                  <span className={impactVisible ? "active" : ""}>
+                    THE IMPACT
+                  </span>
+                </div>
+                <span ref={timeRef}>00:00.0</span>
+              </>
+            ) : (
+              <span>BASED IN NIGERIA. BUILDING EVERYWHERE.</span>
+            )}
           </div>
-          <div className="entrance-build-line" aria-hidden="true">
-            <span>I turn ideas into</span>
-            <div className="entrance-word-window">
-              <div className="entrance-word-reel">
-                <span>powerful backends.</span>
-                <span>mobile experiences.</span>
-                <span>intelligent products.</span>
-                <span>things that matter.</span>
-              </div>
+          {playing && (
+            <div className="film-progress" aria-hidden="true">
+              <span ref={progressRef} />
             </div>
-          </div>
-          <div className="entrance-footer-meta" aria-hidden="true">
-            <span>ONE CURIOUS MIND. MANY POSSIBILITIES.</span>
-            <span>
-              MEET THE WORK <ArrowUpRight size={13} />
-            </span>
-          </div>
-          <div className="entrance-timeline" aria-hidden="true">
-            <span />
-          </div>
+          )}
         </footer>
       </div>
     </dialog>
