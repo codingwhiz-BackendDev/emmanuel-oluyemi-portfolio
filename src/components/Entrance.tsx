@@ -6,12 +6,16 @@ import {
   Code2,
   Command,
   Smartphone,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { profile } from "@/data";
+import { useIntroSound } from "@/hooks/useIntroSound";
 import "./Entrance.css";
 
-const REVEAL_AT = 3900;
-const FINISH_AT = 4800;
+const REVEAL_AT = 4550;
+const FINISH_AT = 5600;
+const CHAPTERS = ["THE HUMAN", "THE CRAFT", "THE POSSIBILITIES"];
 
 interface EntranceProps {
   onReveal: () => void;
@@ -22,6 +26,15 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const finishedRef = useRef(false);
+  const timelineStartRef = useRef<number | null>(null);
+  const {
+    soundEnabled,
+    soundStatus,
+    toggleSound,
+    startSoundtrack,
+    stopSoundtrack,
+  } = useIntroSound();
+  const [chapter, setChapter] = useState(0);
   const [ready, setReady] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [revealing, setRevealing] = useState(false);
@@ -29,9 +42,10 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
   const complete = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
+    stopSoundtrack();
     if (dialogRef.current?.open) dialogRef.current.close();
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, stopSoundtrack]);
 
   useLayoutEffect(() => {
     finishedRef.current = false;
@@ -61,10 +75,15 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
     let started = false;
     let revealTimer: number | undefined;
     let finishTimer: number | undefined;
+    const chapterTimers: number[] = [];
     const start = () => {
       if (started || finishedRef.current) return;
       started = true;
+      timelineStartRef.current = performance.now();
+      startSoundtrack();
       setReady(true);
+      chapterTimers.push(window.setTimeout(() => setChapter(1), 900));
+      chapterTimers.push(window.setTimeout(() => setChapter(2), 3000));
       revealTimer = window.setTimeout(() => {
         setRevealing(true);
         onReveal();
@@ -80,25 +99,33 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
     const handlePreference = () => {
       if (preference.matches) complete();
     };
+    const handleVisibility = () => {
+      if (document.hidden) complete();
+    };
     preference.addEventListener("change", handlePreference);
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       window.clearTimeout(imageDeadline);
       window.clearTimeout(revealTimer);
       window.clearTimeout(finishTimer);
+      chapterTimers.forEach(window.clearTimeout);
+      timelineStartRef.current = null;
+      stopSoundtrack();
       image?.removeEventListener("load", start);
       image?.removeEventListener("error", start);
       preference.removeEventListener("change", handlePreference);
+      document.removeEventListener("visibilitychange", handleVisibility);
       if (dialog.open) dialog.close();
       body.style.overflow = overflow;
       body.style.paddingRight = paddingRight;
     };
-  }, [complete, onReveal]);
+  }, [complete, onReveal, startSoundtrack, stopSoundtrack]);
 
   return (
     <dialog
       ref={dialogRef}
-      className={`entrance${ready ? " entrance-ready" : ""}${revealing ? " entrance-revealing" : ""}`}
+      className={`entrance entrance-phase-${chapter}${ready ? " entrance-ready" : ""}${revealing ? " entrance-revealing" : ""}${soundEnabled ? " entrance-sound-on" : ""}`}
       aria-labelledby="entrance-title"
       aria-describedby="entrance-description"
       onCancel={(event) => {
@@ -116,24 +143,71 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
       />
       <div className="entrance-stage">
         <div className="entrance-grid" aria-hidden="true" />
+        <div className="entrance-vignette" aria-hidden="true" />
+        <div className="entrance-film-grain" aria-hidden="true" />
         <header className="entrance-header">
           <span className="entrance-brand" aria-hidden="true">
             EO<span>.</span>
           </span>
           <span className="entrance-edition" aria-hidden="true">
-            NOT A TEMPLATE. A WHOLE MINDSET.
+            AN EMMANUEL OLUYEMI ORIGINAL / VOL. 01
           </span>
-          <button type="button" onClick={complete} className="entrance-skip">
-            Skip intro <ArrowUpRight size={15} aria-hidden="true" />
-          </button>
+          <div className="entrance-controls">
+            <button
+              type="button"
+              className="entrance-sound"
+              aria-pressed={soundEnabled}
+              aria-label="Enable intro sound"
+              aria-describedby="entrance-audio-status"
+              onClick={() => {
+                const elapsed =
+                  timelineStartRef.current === null
+                    ? 0
+                    : (performance.now() - timelineStartRef.current) / 1000;
+                void toggleSound(elapsed);
+              }}
+            >
+              {soundEnabled ? (
+                <Volume2 size={15} aria-hidden="true" />
+              ) : (
+                <VolumeX size={15} aria-hidden="true" />
+              )}
+              <span>{soundEnabled ? "Sound on" : "Tap for sound"}</span>
+              <span className="entrance-sound-bars" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+            </button>
+            <button type="button" onClick={complete} className="entrance-skip">
+              Skip intro{" "}
+              <span className="entrance-escape-key" aria-hidden="true">
+                ESC
+              </span>
+            </button>
+          </div>
         </header>
 
+        <p id="entrance-audio-status" className="sr-only" role="status">
+          {soundStatus}
+        </p>
         <p id="entrance-description" className="sr-only">
           Meet {profile.name}. I build backend systems with Python and Django,
           mobile apps with Flutter, AI-powered products, and web experiences
           with React.
         </p>
         <div className="entrance-scene">
+          <div className="entrance-frame" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <i />
+          </div>
+          <div className="entrance-scene-label" aria-hidden="true">
+            <span className="entrance-record-dot" /> PERSONAL SHOWREEL{" "}
+            <span>01:EO</span>
+          </div>
           <div className="entrance-backtype" aria-hidden="true">
             <span>THE MIND.</span>
             <span>THE MAKER.</span>
@@ -288,6 +362,18 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
         </div>
 
         <footer className="entrance-footer">
+          <div className="entrance-chapters" aria-hidden="true">
+            {CHAPTERS.map((label, index) => (
+              <span
+                key={label}
+                className={chapter === index ? "is-active" : ""}
+              >
+                <b>0{index + 1}</b>
+                {label}
+                <i />
+              </span>
+            ))}
+          </div>
           <div className="entrance-build-line" aria-hidden="true">
             <span>I turn ideas into</span>
             <div className="entrance-word-window">

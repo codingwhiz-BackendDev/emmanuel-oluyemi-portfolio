@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Pause, Play } from "lucide-react";
+import { Pause, Play, RotateCcw } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
@@ -17,6 +17,13 @@ function App() {
     () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
   const [introRevealing, setIntroRevealing] = useState(false);
+  const [introKey, setIntroKey] = useState(0);
+  const replayIntro = useCallback(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setIntroRevealing(false);
+    setIntroKey((key) => key + 1);
+    setIntroVisible(true);
+  }, []);
   const revealPortfolio = useCallback(() => setIntroRevealing(true), []);
   const finishIntro = useCallback(() => {
     setIntroVisible(false);
@@ -26,7 +33,11 @@ function App() {
   return (
     <>
       {introVisible && (
-        <Entrance onReveal={revealPortfolio} onComplete={finishIntro} />
+        <Entrance
+          key={introKey}
+          onReveal={revealPortfolio}
+          onComplete={finishIntro}
+        />
       )}
       <div
         className={`portfolio${motionPaused ? " motion-paused" : ""}${introVisible && !introRevealing ? " intro-waiting" : ""}`}
@@ -108,6 +119,14 @@ function App() {
             <Pause size={13} aria-hidden="true" />
           )}
           <span>{motionPaused ? "Motion paused" : "Pause motion"}</span>
+        </button>
+        <button
+          type="button"
+          className="intro-replay"
+          onClick={replayIntro}
+          aria-label="Replay the introduction"
+        >
+          <RotateCcw size={13} aria-hidden="true" /> Replay intro
         </button>
       </div>
     </>

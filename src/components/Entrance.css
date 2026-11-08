@@ -615,7 +615,7 @@
     height: 100%;
     background: linear-gradient(90deg, #7446ed, #bea4ff 55%, #d7fa77);
     transform-origin: left;
-    animation: intro-timeline 3.9s linear both;
+    animation: intro-timeline 4.55s linear both;
 }
 .entrance:not(.entrance-ready) .entrance-scene *,
 .entrance:not(.entrance-ready) .entrance-footer * {
@@ -629,6 +629,313 @@
 }
 .entrance-revealing .entrance-curtain-lime {
     animation: intro-curtain-out 0.75s 0.14s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+/* A three-act showreel, with the portrait kept at the heart of the scene. */
+.entrance-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: inset 0 0 160px #0007;
+}
+.entrance-film-grain {
+    position: absolute;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+.entrance-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.entrance-sound {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid #ffffff20;
+    border-radius: 100px;
+    background: #ffffff04;
+    color: #c9c9d2;
+    font-size: 11px;
+    transition:
+        border-color 0.25s,
+        color 0.25s;
+}
+.entrance-sound:hover,
+.entrance-sound[aria-pressed="true"] {
+    color: #d7fa77;
+    border-color: #d7fa7750;
+}
+.entrance-sound:focus-visible {
+    outline: 2px solid #d7fa77;
+    outline-offset: 5px;
+}
+.entrance-escape-key {
+    font: 8px monospace;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 3px 4px;
+    opacity: 0.6;
+}
+.entrance-sound-bars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 14px;
+}
+.entrance-sound-bars i {
+    display: block;
+    width: 2px;
+    height: 3px;
+    background: currentColor;
+    border-radius: 2px;
+}
+.entrance-sound-on .entrance-sound-bars i {
+    animation: intro-sound-bar 0.7s ease-in-out infinite alternate;
+}
+.entrance-sound-on .entrance-sound-bars i:nth-child(2) {
+    animation-delay: -0.45s;
+}
+.entrance-sound-on .entrance-sound-bars i:nth-child(3) {
+    animation-delay: -0.2s;
+}
+.entrance-sound-on .entrance-sound-bars i:nth-child(4) {
+    animation-delay: -0.6s;
+}
+.entrance-frame {
+    position: absolute;
+    inset: 16px 0 12px;
+    pointer-events: none;
+    z-index: 1;
+}
+.entrance-frame i {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: #ffffff30;
+    border-style: solid;
+}
+.entrance-frame i:nth-child(1) {
+    top: 0;
+    left: 0;
+    border-width: 1px 0 0 1px;
+}
+.entrance-frame i:nth-child(2) {
+    top: 0;
+    right: 0;
+    border-width: 1px 1px 0 0;
+}
+.entrance-frame i:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    border-width: 0 0 1px 1px;
+}
+.entrance-frame i:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    border-width: 0 1px 1px 0;
+}
+.entrance-scene-label {
+    position: absolute;
+    top: 21px;
+    left: 27px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #b0b0bb;
+    font: 6px monospace;
+    letter-spacing: 0.12em;
+}
+.entrance-scene-label > span:last-child {
+    color: #747480;
+    margin-left: 5px;
+}
+.entrance-record-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #d7fa77;
+}
+.entrance-portrait-anchor {
+    transition: scale 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.entrance-phase-0 .entrance-portrait-anchor {
+    scale: 1.08;
+}
+.entrance-phase-2 .entrance-portrait-anchor {
+    scale: 0.97;
+}
+.entrance-portrait {
+    transition: rotate 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.entrance-phase-2 .entrance-portrait {
+    rotate: -2deg;
+}
+.entrance-skill {
+    transition:
+        translate 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 1.2s;
+}
+.entrance-phase-2 .entrance-backend {
+    translate: -5px -8px;
+    box-shadow:
+        0 20px 60px #0005,
+        0 0 35px #d7fa7708;
+}
+.entrance-phase-2 .entrance-mobile {
+    translate: 4px -6px;
+}
+.entrance-phase-2 .entrance-web {
+    translate: -4px 5px;
+}
+.entrance-phase-2 .entrance-ai {
+    translate: 5px 6px;
+    box-shadow:
+        0 20px 60px #0005,
+        0 0 45px #7446ed30;
+}
+.entrance-scene {
+    transition:
+        filter 0.65s,
+        scale 0.85s;
+}
+.entrance-revealing .entrance-scene {
+    scale: 1.04;
+    filter: blur(3px);
+}
+.entrance-chapters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    margin-bottom: 18px;
+}
+.entrance-chapters > span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #71717f;
+    font: 6px monospace;
+    letter-spacing: 0.1em;
+    transition: color 0.6s;
+}
+.entrance-chapters b {
+    font-weight: 400;
+    color: #92929e;
+}
+.entrance-chapters i {
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: #ffffff15;
+    transition:
+        width 0.6s,
+        background 0.6s;
+}
+.entrance-chapters > .is-active {
+    color: #d7fa77;
+}
+.entrance-chapters > .is-active i {
+    width: 32px;
+    background: #d7fa77;
+}
+.intro-replay {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 40;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 100px;
+    border: 1px solid #18191c25;
+    background: #f7f7f2ed;
+    color: #18191c;
+    font-size: 10px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 12px #18191c08;
+}
+.intro-replay:hover {
+    border-color: #7446ed;
+    color: #7446ed;
+}
+@keyframes intro-sound-bar {
+    from {
+        height: 3px;
+    }
+    to {
+        height: 12px;
+    }
+}
+@media (max-width: 767px) {
+    .entrance-controls {
+        gap: 6px;
+    }
+    .entrance-sound {
+        padding-inline: 10px;
+        gap: 6px;
+        font-size: 10px;
+    }
+    .entrance-sound-bars,
+    .entrance-escape-key {
+        display: none;
+    }
+    .entrance-chapters {
+        gap: 13px;
+        margin-bottom: 13px;
+    }
+    .entrance-chapters > span {
+        font-size: 5px;
+        gap: 4px;
+    }
+    .entrance-chapters i {
+        width: 8px;
+    }
+    .entrance-chapters > .is-active i {
+        width: 15px;
+    }
+    .entrance-scene-label {
+        top: 20px;
+        left: 13px;
+        font-size: 5px;
+    }
+    .entrance-frame {
+        inset: 12px -5px 6px;
+    }
+    .entrance-scene-label > span:last-child {
+        display: none;
+    }
+    .entrance-vignette {
+        box-shadow: inset 0 0 90px #0005;
+    }
+}
+@media (max-height: 650px) {
+    .entrance-chapters {
+        margin-bottom: 9px;
+    }
+    .entrance-scene-label {
+        display: none;
+    }
+}
+@media (max-height: 420px) {
+    .entrance-chapters {
+        display: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .intro-replay {
+        display: none;
+    }
 }
 
 @keyframes intro-photo-in {
