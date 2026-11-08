@@ -48,14 +48,8 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState<Phase>("portrait");
   const [imageFailed, setImageFailed] = useState(false);
-  const {
-    soundEnabled,
-    soundStatus,
-    enableSound,
-    muteSound,
-    startSoundtrack,
-    stopSoundtrack,
-  } = useIntroSound();
+  const { soundEnabled, soundStatus, enableSound, muteSound, stopSoundtrack } =
+    useIntroSound();
 
   const complete = useCallback(() => {
     if (finishedRef.current) return;
@@ -117,6 +111,14 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
     if (!playing || startedAtRef.current === null) return;
     skipRef.current?.focus({ preventScroll: true });
     let frame = 0;
+    // Completion must not depend on the browser continuing to paint frames.
+    const finishTimer = window.setTimeout(
+      complete,
+      Math.max(
+        0,
+        INTRO_TIMING.finish - (performance.now() - startedAtRef.current),
+      ),
+    );
     const update = () => {
       if (finishedRef.current || startedAtRef.current === null) return;
       const elapsed = performance.now() - startedAtRef.current;
@@ -140,7 +142,10 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
       frame = requestAnimationFrame(update);
     };
     frame = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(finishTimer);
+    };
   }, [playing, complete, onReveal]);
 
   const begin = async (withSound: boolean) => {
@@ -165,7 +170,6 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
     }
     if (!aliveRef.current || finishedRef.current) return;
     startedAtRef.current = performance.now();
-    if (withSound) startSoundtrack();
     setPlaying(true);
     setBusy(false);
   };
@@ -177,10 +181,12 @@ export function Entrance({ onReveal, onComplete }: EntranceProps) {
       return;
     }
     setBusy(true);
-    const unlocked = await enableSound();
+    await enableSound(
+      startedAtRef.current === null
+        ? 0
+        : (performance.now() - startedAtRef.current) / 1000,
+    );
     if (!aliveRef.current || finishedRef.current) return;
-    if (unlocked && startedAtRef.current !== null)
-      startSoundtrack((performance.now() - startedAtRef.current) / 1000);
     setBusy(false);
   };
 
