@@ -84,8 +84,8 @@ export function Hero() {
             <img
               src="/images/hero.jpg"
               alt="Emmanuel Oluyemi"
-              width={600}
-              height={750}
+              width={960}
+              height={1280}
               fetchPriority="high"
             />
             <div className="portrait-caption">
