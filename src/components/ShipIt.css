@@ -648,6 +648,14 @@
     text-align: center;
 }
 
+.ship-audio-status {
+    margin: 0;
+    padding: 0 26px 14px;
+    color: var(--ship-muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
 .ship-local {
     display: inline-flex;
     align-items: center;
@@ -892,6 +900,26 @@
     .ship-footer {
         gap: 10px;
         padding: 14px 16px;
+    }
+}
+
+@media (max-width: 380px) {
+    .ship-header {
+        padding: 12px;
+    }
+    .ship-logo {
+        column-gap: 6px;
+    }
+    .ship-logo strong {
+        font-size: 18px;
+    }
+    .ship-logo > svg {
+        width: 28px;
+        height: 28px;
+        padding: 5px;
+    }
+    .ship-audio-status {
+        padding-inline: 16px;
     }
 }
 

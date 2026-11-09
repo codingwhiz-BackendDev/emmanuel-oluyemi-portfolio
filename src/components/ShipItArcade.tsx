@@ -17,6 +17,8 @@ import {
   Rocket,
   RotateCcw,
   Trophy,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
 import {
@@ -30,6 +32,7 @@ import {
   type GameState,
 } from "./shipItEngine";
 import { drawGame } from "./shipItRenderer";
+import { useShipItAudio } from "@/hooks/useShipItAudio";
 
 const BEST_KEY = "eo-ship-it-best-v1";
 function readBest() {
@@ -56,7 +59,15 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef(createGame());
-  const photoRef = useRef<HTMLImageElement | null>(null);
+  const {
+    soundEnabled,
+    soundStatus,
+    start: startAudio,
+    pause: pauseAudio,
+    resume: resumeAudio,
+    playEffect,
+    toggleSound,
+  } = useShipItAudio();
   const reducedMotion = useRef(
     window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -78,26 +89,31 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
       0,
       0,
     );
-    drawGame(context, gameRef.current, photoRef.current, reducedMotion.current);
+    drawGame(context, gameRef.current, reducedMotion.current);
   }, []);
 
   const pause = useCallback(() => {
     togglePause(gameRef.current);
+    if (gameRef.current.status === "paused") pauseAudio();
+    else if (gameRef.current.status === "running") resumeAudio();
     setHud(snapshot(gameRef.current));
     canvasRef.current?.focus({ preventScroll: true });
-  }, []);
+  }, [pauseAudio, resumeAudio]);
 
   const start = useCallback(() => {
     gameRef.current = startGame();
+    startAudio();
     setNewBest(false);
     setHud(snapshot(gameRef.current));
     canvasRef.current?.focus({ preventScroll: true });
-  }, []);
+  }, [startAudio]);
 
   const hop = useCallback(() => {
-    jump(gameRef.current);
-    draw();
-  }, [draw]);
+    if (jump(gameRef.current)) {
+      playEffect(gameRef.current.jumps === 2 ? "double-jump" : "jump");
+      draw();
+    }
+  }, [draw, playEffect]);
 
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -143,10 +159,7 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     resize();
-    const photo = new Image();
-    photoRef.current = photo;
-    photo.onload = draw;
-    photo.src = `${import.meta.env.BASE_URL}images/hero.jpg`;
+
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const onPreference = () => {
       reducedMotion.current = preference.matches;
@@ -156,6 +169,7 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
     const autoPause = () => {
       if (gameRef.current.status === "running") {
         gameRef.current.status = "paused";
+        pauseAudio();
         setHud(snapshot(gameRef.current));
       }
     };
@@ -166,13 +180,12 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
     window.addEventListener("blur", autoPause);
     return () => {
       observer.disconnect();
-      photo.onload = null;
-      photoRef.current = null;
+
       preference.removeEventListener("change", onPreference);
       document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("blur", autoPause);
     };
-  }, [draw]);
+  }, [draw, pauseAudio]);
 
   useEffect(() => {
     draw();
@@ -183,6 +196,8 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
     const animate = (now: number) => {
       if (gameRef.current.status !== "running") return;
       const game = gameRef.current;
+      const previousCommits = game.commits;
+      const previousCoffees = game.coffees;
       // Catch up in collision-safe steps on slower devices without letting a
       // suspended browser tab advance an entire run in one frame.
       let remaining = Math.min(0.25, (now - previous) / 1000);
@@ -194,6 +209,8 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
       previous = now;
       draw();
       if (game.status === "over") {
+        pauseAudio();
+        playEffect("crash");
         if (game.score > bestRef.current) {
           bestRef.current = game.score;
           setBest(game.score);
@@ -207,6 +224,8 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
         setHud(snapshot(game));
         return;
       }
+      if (game.commits > previousCommits) playEffect("commit");
+      if (game.coffees > previousCoffees) playEffect("coffee");
       if (now - lastUpdate >= 100) {
         setHud(snapshot(game));
         lastUpdate = now;
@@ -215,11 +234,16 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
-  }, [hud.status, draw]);
+  }, [hud.status, draw, pauseAudio, playEffect]);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.altKey || event.ctrlKey || event.metaKey || event.repeat) return;
     const key = event.key.toLowerCase();
+    if (key === "m") {
+      event.preventDefault();
+      toggleSound();
+      return;
+    }
     if (key === "p") {
       event.preventDefault();
       if (
@@ -242,6 +266,7 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
   const running = hud.status === "running";
   const paused = hud.status === "paused";
   const over = hud.status === "over";
+  const soundActive = soundEnabled || soundStatus.startsWith("Loading");
   return (
     <dialog
       ref={dialogRef}
@@ -264,6 +289,23 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
             </div>
           </div>
           <div className="ship-header-actions">
+            <button
+              type="button"
+              className="ship-icon-button"
+              onClick={toggleSound}
+              aria-label={
+                soundActive
+                  ? "Mute game music and effects"
+                  : "Enable game music and effects"
+              }
+              aria-pressed={soundActive}
+              aria-describedby="ship-audio-status"
+              title={
+                soundActive ? "Mute music & effects" : "Enable music & effects"
+              }
+            >
+              {soundActive ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </button>
             <button
               type="button"
               className="ship-icon-button"
@@ -312,7 +354,7 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
             height={HEIGHT}
             tabIndex={0}
             role="img"
-            aria-label="Side-scrolling runner. Emmanuel jumps over bugs, outages, and scope creep while collecting commits and coffee."
+            aria-label="Side-scrolling runner. Byte the animated courier robot jumps over bugs, outages, and scope creep while collecting commits and coffee."
             aria-describedby="ship-instructions"
             onPointerDown={(event) => {
               if (running) {
@@ -368,7 +410,7 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
                       : over
                         ? hud.reason +
                           " Shake it off. Your next release awaits."
-                        : "That’s me, on a deadline. Jump the bugs. Dodge scope creep. Fuel up on coffee. How far can you ship?"}
+                        : "Meet Byte, your tiny release courier. Jump the bugs, dodge scope creep, and fuel up on coffee. Original music and arcade sounds kick in when you start."}
                 </p>
                 {over && (
                   <div className="ship-result-stats">
@@ -458,12 +500,21 @@ export default function ShipItArcade({ onClose }: { onClose: () => void }) {
           </div>
           <p id="ship-instructions">
             <kbd>Space</kbd> / <kbd>↑</kbd> jump twice · <kbd>P</kbd> pause ·{" "}
-            <kbd>Esc</kbd> exit. Touch: tap the game or Jump.
+            <kbd>M</kbd> mute · <kbd>Esc</kbd> exit. Touch: tap the game or
+            Jump.
           </p>
           <span className="ship-local">
             <Maximize2 size={12} aria-hidden="true" /> Best saved on this device
           </span>
         </footer>
+        <p
+          id="ship-audio-status"
+          className="ship-audio-status"
+          role="status"
+          aria-live="polite"
+        >
+          {soundStatus}
+        </p>
         <p className="sr-only" role="status" aria-live="polite">
           {hud.status === "over"
             ? `Game over. Score ${hud.score}. ${newBest ? "New personal best." : ""} ${hud.reason}`
