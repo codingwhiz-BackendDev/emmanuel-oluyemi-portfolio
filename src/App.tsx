@@ -99,9 +99,9 @@ function App() {
               <span>BUILT TO MOVE YOU ↗</span>
             </div>
           </section>
+          <ShipIt motionPaused={motionPaused} />
           <About />
           <Projects />
-          <ShipIt motionPaused={motionPaused} />
           <Services />
           <Achievements />
           <Experience />
